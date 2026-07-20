@@ -3,6 +3,16 @@ import os
 
 from badminton_analysis.system import BadmintonAnalysisSystem, load_runtime_dependencies
 
+# Project root directory (same as this file's directory)
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def _resolve_model_path(path):
+    """Resolve model path relative to project root if not absolute."""
+    if os.path.isabs(path):
+        return path
+    return os.path.join(_PROJECT_ROOT, path)
+
 
 
 def main():
@@ -47,11 +57,11 @@ def main():
         save_images=args.save_images,
         language=args.language,
         output_dir=args.output_dir,
-        ball_model_path=args.ball_model,
+        ball_model_path=_resolve_model_path(args.ball_model),
         template_path=args.template_path,
         pose_mode=args.pose_mode,
         pose_family=args.pose_family,
-        yolo_pose_model=args.yolo_pose_model,
+        yolo_pose_model=_resolve_model_path(args.yolo_pose_model),
         show_pose_roi=args.pose_roi == 'true'
     )
 

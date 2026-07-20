@@ -1,9 +1,45 @@
 import json
 import os
+import shutil
 import subprocess
 import time
 
 import cv2
+
+
+def _get_ffmpeg_path():
+    """Locate ffmpeg binary, preferring imageio_ffmpeg bundled version."""
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        pass
+    path = shutil.which("ffmpeg")
+    if path:
+        return path
+    return "ffmpeg"
+
+
+def _get_ffprobe_path():
+    """Locate ffprobe binary, preferring imageio_ffmpeg bundled version."""
+    try:
+        import imageio_ffmpeg
+        ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
+        # ffprobe is typically in the same directory as ffmpeg
+        ffprobe_path = os.path.join(os.path.dirname(ffmpeg_path), "ffprobe")
+        if os.path.isfile(ffprobe_path):
+            return ffprobe_path
+        # On Windows, try .exe extension
+        if os.name == "nt":
+            ffprobe_path += ".exe"
+            if os.path.isfile(ffprobe_path):
+                return ffprobe_path
+    except Exception:
+        pass
+    path = shutil.which("ffprobe")
+    if path:
+        return path
+    return "ffprobe"
 
 
 def encode_vscode_compatible_mp4(input_video_path, output_path, audio_source_path=None):
@@ -16,7 +52,7 @@ def encode_vscode_compatible_mp4(input_video_path, output_path, audio_source_pat
         final_output_path = f"{output_path}.h264.tmp.mp4"
 
     command = [
-        "ffmpeg",
+        _get_ffmpeg_path(),
         "-y",
         "-i",
         input_video_path,
@@ -70,7 +106,7 @@ def has_audio_track(video_path):
     try:
         result = subprocess.run(
             [
-                "ffprobe",
+                _get_ffprobe_path(),
                 "-v",
                 "quiet",
                 "-print_format",

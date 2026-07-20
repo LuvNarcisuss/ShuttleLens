@@ -18,6 +18,16 @@ _MAX_WEBUI_OUTPUTS = 10
 
 _dependencies_loaded = False
 
+# Project root directory (parent of webui/)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _resolve_model_path(path):
+    """Resolve model path relative to project root if not absolute."""
+    if os.path.isabs(path):
+        return path
+    return os.path.join(_PROJECT_ROOT, path)
+
 
 def imread_safe(path, flags=cv2.IMREAD_COLOR):
     """cv2.imread with fallback for Unicode paths on Windows."""
@@ -216,8 +226,8 @@ def run_analysis(video_path, template_path, corners, options, progress_cb=None):
     language = options.get("language", "zh")
     pose_family = options.get("pose_family", "yolo-pose")
     pose_mode = options.get("pose_mode", "balanced")
-    yolo_pose_model = options.get("yolo_pose_model", "weights/yolo11n-pose.pt")
-    ball_model = options.get("ball_model", "weights/yolo11s-ball.pt")
+    yolo_pose_model = _resolve_model_path(options.get("yolo_pose_model", "weights/yolo11n-pose.pt"))
+    ball_model = _resolve_model_path(options.get("ball_model", "weights/yolo11s-ball.pt"))
     keep_audio = options.get("audio", True)
     show_skeletons = options.get("show_skeletons", True)
     show_player_trajectories = options.get("show_player_trajectories", True)

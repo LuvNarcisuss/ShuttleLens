@@ -10,6 +10,9 @@ __pycache__/
 venv/
 env/
 .agents/
+.claude/
+.reasonix/
+.playwright-cli/
 
 # Local inputs and generated outputs
 results/
@@ -28,3 +31,4 @@ weights/*
 Thumbs.db
 .idea/
 .vscode/
+docs/
