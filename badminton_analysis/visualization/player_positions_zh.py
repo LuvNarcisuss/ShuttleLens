@@ -801,7 +801,7 @@ def analyze_player_positions(detections_path, output_dir=None, fps=30):
     success = visualizer.visualize()
     
     if success:
-        print(f"球员位置分析完成，可视化结果已保存至: {visualizer.output_dir}")
+        print("球员位置分析完成，可视化结果已生成，等待任务归档。")
     else:
         print("球员位置分析失败")
         

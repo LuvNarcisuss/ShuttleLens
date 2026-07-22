@@ -771,7 +771,7 @@ def analyze_player_positions(detections_path, output_dir=None, fps=30):
     success = visualizer.visualize()
     
     if success:
-        print(f"Player position analysis complete, visualizations saved to: {visualizer.output_dir}")
+        print("Player position analysis complete; visualizations generated and awaiting task archival.")
     else:
         print("Player position analysis failed")
         

@@ -17,8 +17,8 @@ def _resolve_model_path(path):
 
 def main():
     parser = argparse.ArgumentParser(description='羽毛球比赛视频分析系统')
-    parser.add_argument('--video-path', default='videos/demo.mp4', type=str, help='输入视频文件路径')
-    parser.add_argument('--template-path', default='templates/demo.png', type=str, help='球场模板图像路径；不提供时会弹出文件选择框')
+    parser.add_argument('--video-path', default='demo_file/videos/demo.mp4', type=str, help='输入视频文件路径')
+    parser.add_argument('--template-path', default='demo_file/templates/demo.png', type=str, help='球场模板图像路径；不提供时会弹出文件选择框')
     parser.add_argument('--output-dir', default=None, type=str, help='输出目录，默认 outputs/<视频文件名>')
     parser.add_argument('--ball-model', default='weights/yolo11s-ball.pt', type=str, help='YOLO 羽毛球检测模型路径')
     parser.add_argument('--pose-family', default='yolo-pose', choices=['rtmpose', 'rtmo', 'yolo-pose'], help='姿态模型族')
