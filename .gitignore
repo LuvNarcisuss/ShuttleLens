@@ -1,34 +1,43 @@
-# Python
+# Python 编译缓存文件
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+
+# Python 开发工具缓存
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Python 虚拟环境
 .venv/
 venv/
 env/
+
+# AI/Agent 开发相关工具
 .agents/
 .claude/
-.reasonix/
 .playwright-cli/
+.superpowers/
+AGENTS.md
 
-# Local inputs and generated outputs
+# 本地输入和生成输出文件
 results/
 outputs/
 *.log
 
-# Model weights are intentionally not published
+# 模型权重文件（故意不发布）
 weights/*
 !weights/.gitkeep
 *.pt
 *.pth
 *.onnx
 
-# OS and editor files
+# 操作系统和编辑器文件
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+
+# 文档文件
 docs/
