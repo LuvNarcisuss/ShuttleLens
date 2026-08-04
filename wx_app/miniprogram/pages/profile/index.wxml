@@ -9,7 +9,7 @@
       <text class="status {{isLoggedIn ? 'online' : ''}}">{{loginStatus}}</text>
       <text wx:if="{{isLoggedIn && maskedPhone}}" class="phone">{{maskedPhone}}</text>
     </view>
-    <button wx:if="{{!isLoggedIn}}" class="login" bindtap="login" loading="{{isLoggingIn}}" disabled="{{isLoggingIn}}">微信快捷登录</button>
+    <button wx:if="{{!isLoggedIn && !isLoading}}" class="login" bindtap="login">微信快捷登录</button>
   </view>
 
   <view class="profile-section">
@@ -23,7 +23,7 @@
       <view class="task" wx:for="{{tasks}}" wx:key="id">
         <view class="task-top">
           <text class="task-id">任务 {{item.id}}</text>
-          <text class="badge status-{{item.status}}">{{item.status}}</text>
+          <text class="badge status-{{item.status}}">{{item.statusLabel}}</text>
         </view>
         <view class="progress-row">
           <progress class="progress" percent="{{item.progress}}" stroke-width="5" activeColor="#1688FF" backgroundColor="#E3E8EF" />

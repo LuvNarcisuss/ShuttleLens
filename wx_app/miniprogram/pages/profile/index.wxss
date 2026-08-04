@@ -39,3 +39,4 @@ page {
 .profile-edit-action, .profile-danger-action { width: 100%; margin: 0; border-radius: 14rpx; font-size: 25rpx; line-height: 76rpx; }
 .profile-edit-action { background: #EAF4FF; color: var(--brand-primary-strong); }
 .profile-danger-action { background: #FFF0F0; color: var(--brand-danger); }
+.login, .preview, .profile-edit-action, .profile-danger-action { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 88rpx; line-height: 1.2; }

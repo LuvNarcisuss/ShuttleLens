@@ -15,7 +15,7 @@ button::after { border: 0; }
 .empty-title { color: var(--brand-text); font-size: 32rpx; font-weight: 680; }
 .empty-action { margin-top: 18rpx; padding: 0 42rpx; border-radius: 12rpx; background: var(--brand-primary); color: #FFFFFF; font-size: 25rpx; }
 .task-list { margin: 0 24rpx; }
-.task-card { display: flex; gap: 22rpx; margin-bottom: 18rpx; padding: 22rpx; }
+.task-card { display: flex; box-sizing: border-box; min-height: 88rpx; gap: 22rpx; margin-bottom: 18rpx; padding: 22rpx; }
 .cover { flex: none; width: 178rpx; height: 122rpx; border-radius: 14rpx; background: #EAF4FF; }
 .cover.placeholder { display: flex; align-items: center; justify-content: center; background: #EAF4FF; color: var(--brand-primary); font-size: 42rpx; font-weight: 760; }
 .task-body { flex: 1; min-width: 0; }
@@ -36,5 +36,6 @@ button::after { border: 0; }
 .action.primary { background: #EAF4FF; color: var(--brand-primary-strong); }
 .action.danger { background: #FDEBEC; color: var(--brand-danger); }
 .load-more { margin: 28rpx auto 40rpx; width: 260rpx; border-radius: 12rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 24rpx; }
+.create, .filter, .empty-action, .action, .load-more { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 88rpx; line-height: 1.2; }
 .loading-more { padding: 32rpx; color: var(--brand-muted); font-size: 23rpx; text-align: center; }
 .error { display: block; margin: 24rpx; padding: 20rpx; border-left: 6rpx solid var(--brand-danger); background: #FDEBEC; color: #BE353A; font-size: 23rpx; line-height: 1.5; }

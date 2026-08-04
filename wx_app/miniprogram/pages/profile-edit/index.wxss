@@ -4,7 +4,7 @@ page {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
 }
 
-.page { min-height: 100vh; box-sizing: border-box; padding: 32rpx 24rpx 48rpx; }
+.page { height: 100vh; box-sizing: border-box; padding: 32rpx 24rpx calc(48rpx + env(safe-area-inset-bottom)); }
 .profile-edit-header { padding: 14rpx 8rpx 30rpx; }
 .heading { display: block; font-size: 40rpx; font-weight: 700; }
 .hint { display: block; margin-top: 12rpx; color: var(--brand-muted); font-size: 25rpx; line-height: 40rpx; }
@@ -26,3 +26,4 @@ page {
 .form-busy, .form-error { display: block; font-size: 24rpx; line-height: 1.6; }
 .form-busy { color: #9A6700; }
 .form-error { color: var(--brand-danger); }
+.secondary, .primary { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 88rpx; line-height: 1.2; }

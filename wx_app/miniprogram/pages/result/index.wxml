@@ -24,22 +24,94 @@
     </view>
 
     <view wx:if="{{analytics}}" class="result-card dashboard">
-      <view class="card-title"><text>数据看板</text><text class="confidence">可信度 {{quality.confidence || 'unknown'}}</text></view>
+      <view class="card-title">
+        <text>数据看板</text>
+        <text class="confidence">可信度 {{quality.confidence || 'unknown'}}</text>
+      </view>
       <text class="quality-note" wx:if="{{quality.explanation}}">{{quality.explanation}}</text>
-      <view class="scope-tabs"><view class="scope-tab {{scope === 'match' ? 'active' : ''}}" data-scope="match" bindtap="changeScope">比赛</view><view class="scope-tab {{scope === 'player' ? 'active' : ''}}" data-scope="player" bindtap="changeScope">球员</view><view class="scope-tab {{scope === 'rally' ? 'active' : ''}}" data-scope="rally" bindtap="changeScope">回合</view></view>
-      <view class="player-switch" wx:if="{{scope !== 'match'}}"><text class="{{selectedPlayer === 'upper' ? 'selected' : ''}}" data-player="upper" bindtap="selectPlayer">上半场球员</text><text class="{{selectedPlayer === 'lower' ? 'selected' : ''}}" data-player="lower" bindtap="selectPlayer">下半场球员</text></view>
-      <view class="metric-grid"><view wx:for="{{metricCards}}" wx:key="key" class="metric-card"><text class="metric-label">{{item.label}}</text><view><text class="metric-value">{{item.value}}</text><text class="metric-unit">{{item.unit}}</text></view><text class="metric-meta">{{item.confidence}} · {{item.source}}</text><text class="metric-reason" wx:if="{{item.reason}}">{{item.reason}}</text></view></view>
-      <scroll-view class="timeline" scroll-x wx:if="{{rallies.length}}"><view class="timeline-row"><view wx:for="{{rallies}}" wx:key="id" class="rally-chip {{selectedRallyId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" data-seconds="{{item.start_sec}}" bindtap="selectRally"><text>回合 {{item.index}}</text><text>{{item.start_sec}}s · {{item.duration_sec}}s</text></view></view></scroll-view>
+      <view class="scope-tabs">
+        <view class="scope-tab {{scope === 'match' ? 'active' : ''}}" data-scope="match" bindtap="changeScope">比赛</view>
+        <view class="scope-tab {{scope === 'player' ? 'active' : ''}}" data-scope="player" bindtap="changeScope">球员</view>
+        <view class="scope-tab {{scope === 'rally' ? 'active' : ''}}" data-scope="rally" bindtap="changeScope">回合</view>
+      </view>
+      <view class="player-switch" wx:if="{{scope !== 'match'}}">
+        <text class="{{selectedPlayer === 'upper' ? 'selected' : ''}}" data-player="upper" bindtap="selectPlayer">上半场球员</text>
+        <text class="{{selectedPlayer === 'lower' ? 'selected' : ''}}" data-player="lower" bindtap="selectPlayer">下半场球员</text>
+      </view>
+      <view class="metric-grid">
+        <view wx:for="{{metricCards}}" wx:key="key" class="metric-card">
+          <text class="metric-label">{{item.label}}</text>
+          <view>
+            <text class="metric-value">{{item.value}}</text>
+            <text class="metric-unit">{{item.unit}}</text>
+          </view>
+          <text class="metric-meta">{{item.confidence}} · {{item.source}}</text>
+          <text class="metric-reason" wx:if="{{item.reason}}">{{item.reason}}</text>
+        </view>
+      </view>
+      <scroll-view class="timeline" scroll-x wx:if="{{rallies.length}}">
+        <view class="timeline-row">
+          <view wx:for="{{rallies}}" wx:key="id" class="rally-chip {{selectedRallyId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" data-seconds="{{item.start_sec}}" bindtap="selectRally">
+            <text>回合 {{item.index}}</text>
+            <text>{{item.start_sec}}s · {{item.duration_sec}}s</text>
+          </view>
+        </view>
+      </scroll-view>
     </view>
 
     <view wx:if="{{highlights.length}}" class="result-card">
       <text class="card-title">高光时间轴</text>
-      <view wx:for="{{highlights}}" wx:key="id" class="highlight-item"><view class="highlight-main" data-seconds="{{item.start_sec}}" bindtap="seekTo"><text class="highlight-title">{{item.title || '系统推荐高光'}}</text><text>{{item.start_sec}}s – {{item.end_sec}}s · {{item.source === 'user_edited' ? '已编辑' : '系统推荐'}}</text><text wx:if="{{item.reasons.length}}">{{item.reasons[0]}}</text></view><view class="highlight-actions"><button class="edit-button" data-index="{{index}}" bindtap="editHighlight">编辑</button><button class="edit-button save-clip" data-id="{{item.id}}" bindtap="saveHighlightClip" loading="{{savingClipId === item.id}}">保存片段</button></view></view>
+      <view wx:for="{{highlights}}" wx:key="id" class="highlight-item">
+        <view class="highlight-main" data-seconds="{{item.start_sec}}" bindtap="seekTo">
+          <text class="highlight-title">{{item.title || '系统推荐高光'}}</text>
+          <text>{{item.start_sec}}s – {{item.end_sec}}s · {{item.source === 'user_edited' ? '已编辑' : '系统推荐'}}</text>
+          <text wx:if="{{item.reasons.length}}">{{item.reasons[0]}}</text>
+        </view>
+        <view class="highlight-actions">
+          <button class="edit-button" data-index="{{index}}" bindtap="editHighlight">编辑</button>
+          <button class="edit-button save-clip" data-id="{{item.id}}" bindtap="saveHighlightClip" loading="{{savingClipId === item.id}}">保存片段</button>
+        </view>
+      </view>
     </view>
 
-    <view class="result-card share-card"><view><text class="highlight-title">受控分享</text><text>生成 24 小时有效的报告访问路径</text></view><button class="edit-button share-button" bindtap="shareReport" loading="{{sharingReport}}">复制路径</button></view>
+    <view class="result-card share-card">
+      <view>
+        <text class="highlight-title">受控分享</text>
+        <text>生成 24 小时有效的报告访问路径</text>
+      </view>
+      <button class="edit-button share-button" bindtap="shareReport" loading="{{sharingReport}}">复制路径</button>
+    </view>
 
-    <view wx:if="{{highlightEditorOpen}}" class="editor-mask" bindtap="closeHighlightEditor"><view class="result-sheet" catchtap="noop"><text class="editor-title">编辑高光</text><view class="editor-field"><text>标题</text><input value="{{highlightDraft.title}}" data-field="title" bindinput="onHighlightField" maxlength="120" /></view><view class="editor-time"><view class="editor-field"><text>开始秒</text><input type="digit" value="{{highlightDraft.start_sec}}" data-field="start_sec" bindinput="onHighlightField" /></view><view class="editor-field"><text>结束秒</text><input type="digit" value="{{highlightDraft.end_sec}}" data-field="end_sec" bindinput="onHighlightField" /></view></view><view class="editor-field inline"><text>加入导出</text><switch checked="{{highlightDraft.selected}}" data-field="selected" bindchange="onHighlightField" color="#12B76A" /></view><text class="restore" bindtap="restoreHighlightRange">恢复系统推荐范围</text><view class="editor-actions"><button class="secondary" bindtap="closeHighlightEditor">取消</button><button class="save-button" bindtap="saveHighlight" loading="{{savingHighlight}}">保存</button></view></view></view>
+    <view wx:if="{{highlightEditorOpen}}" class="editor-mask" bindtap="closeHighlightEditor">
+      <view class="result-sheet" catchtap="noop">
+        <text class="editor-title">编辑高光</text>
+        <scroll-view class="editor-scroll" scroll-y>
+          <view class="editor-field">
+            <text>标题</text>
+            <input value="{{highlightDraft.title}}" data-field="title" bindinput="onHighlightField" maxlength="120" />
+          </view>
+          <view class="editor-time">
+            <view class="editor-field">
+              <text>开始秒</text>
+              <input type="digit" value="{{highlightDraft.start_sec}}" data-field="start_sec" bindinput="onHighlightField" />
+            </view>
+            <view class="editor-field">
+              <text>结束秒</text>
+              <input type="digit" value="{{highlightDraft.end_sec}}" data-field="end_sec" bindinput="onHighlightField" />
+            </view>
+          </view>
+          <view class="editor-field inline">
+            <text>加入导出</text>
+            <switch checked="{{highlightDraft.selected}}" data-field="selected" bindchange="onHighlightField" color="#12B76A" />
+          </view>
+          <text class="restore" bindtap="restoreHighlightRange">恢复系统推荐范围</text>
+        </scroll-view>
+        <view class="editor-actions">
+          <button class="secondary" bindtap="closeHighlightEditor">取消</button>
+          <button class="save-button" bindtap="saveHighlight" loading="{{savingHighlight}}">保存</button>
+        </view>
+      </view>
+    </view>
 
     <view class="result-card">
       <text class="card-title">分析图表</text>
