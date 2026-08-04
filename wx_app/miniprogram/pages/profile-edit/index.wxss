@@ -1,0 +1,25 @@
+page {
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+.page { min-height: 100vh; box-sizing: border-box; padding: 32rpx 24rpx 48rpx; }
+.profile-edit-header { padding: 14rpx 8rpx 30rpx; }
+.heading { display: block; font-size: 40rpx; font-weight: 700; }
+.hint { display: block; margin-top: 12rpx; color: var(--brand-muted); font-size: 25rpx; line-height: 40rpx; }
+.profile-form-section { margin-top: 20rpx; padding: 0 28rpx; border: 1rpx solid var(--brand-divider); border-radius: 22rpx; background: #FFFFFF; box-shadow: 0 6rpx 20rpx rgba(35, 72, 120, .08); }
+.profile-form-row { display: flex; min-height: 124rpx; box-sizing: border-box; align-items: center; justify-content: space-between; gap: 24rpx; }
+.profile-avatar-row { min-height: 176rpx; }
+.profile-nickname-row { display: block; padding: 26rpx 0; }
+.label { display: block; color: var(--brand-text); font-size: 27rpx; font-weight: 600; }
+.field-hint { display: block; margin-top: 8rpx; color: var(--brand-muted); font-size: 23rpx; }
+.avatar-button { flex: 0 0 auto; width: 128rpx; height: 128rpx; margin: 0; padding: 0; overflow: hidden; border-radius: 64rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 22rpx; }
+.avatar-button::after, .primary::after, .secondary::after { border: 0; }
+.avatar { width: 100%; height: 100%; }
+.avatar-placeholder { line-height: 128rpx; }
+.nickname { box-sizing: border-box; width: 100%; margin-top: 16rpx; padding: 20rpx 22rpx; border: 1rpx solid var(--brand-divider); border-radius: 14rpx; background: #FFFFFF; color: var(--brand-text); font-size: 27rpx; }
+.phone { display: block; margin-top: 8rpx; color: var(--brand-text); font-size: 28rpx; font-weight: 600; }
+.secondary { flex: 0 0 auto; margin: 0; padding: 0 22rpx; border-radius: 12rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 23rpx; line-height: 64rpx; }
+.primary { margin-top: 32rpx; border-radius: 999rpx; background: var(--brand-primary); color: #FFFFFF; font-weight: 600; }
+.error { display: block; margin-top: 16rpx; color: var(--brand-danger); font-size: 24rpx; line-height: 1.6; }

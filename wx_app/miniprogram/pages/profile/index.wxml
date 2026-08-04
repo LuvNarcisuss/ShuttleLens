@@ -1,0 +1,56 @@
+<scroll-view class="page" scroll-y>
+  <view class="profile-hero">
+    <view class="avatar-shell">
+      <image wx:if="{{avatarUrl}}" class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+      <text wx:else class="avatar-fallback">羽</text>
+    </view>
+    <view class="identity">
+      <text class="name">{{displayName}}</text>
+      <text class="status {{isLoggedIn ? 'online' : ''}}">{{loginStatus}}</text>
+      <text wx:if="{{isLoggedIn && maskedPhone}}" class="phone">{{maskedPhone}}</text>
+    </view>
+    <button wx:if="{{!isLoggedIn}}" class="login" bindtap="login" loading="{{isLoggingIn}}" disabled="{{isLoggingIn}}">微信快捷登录</button>
+  </view>
+
+  <view class="profile-section">
+    <view class="section-heading">
+      <text>最近任务</text>
+      <text class="count">{{tasks.length}} 项</text>
+    </view>
+    <view wx:if="{{isLoading}}" class="empty">正在加载…</view>
+    <view wx:elif="{{!tasks.length}}" class="empty">暂无分析任务</view>
+    <view wx:else class="task-list">
+      <view class="task" wx:for="{{tasks}}" wx:key="id">
+        <view class="task-top">
+          <text class="task-id">任务 {{item.id}}</text>
+          <text class="badge status-{{item.status}}">{{item.status}}</text>
+        </view>
+        <view class="progress-row">
+          <progress class="progress" percent="{{item.progress}}" stroke-width="5" activeColor="#1688FF" backgroundColor="#E3E8EF" />
+          <text>{{item.progress}}%</text>
+        </view>
+        <view class="task-bottom">
+          <text>{{item.createdAt}}</text>
+          <button wx:if="{{item.status === 'succeeded'}}" class="preview" data-task-id="{{item.id}}" bindtap="openTask">查看结果</button>
+        </view>
+      </view>
+    </view>
+    <text class="error" wx:if="{{errorMessage}}">{{errorMessage}}</text>
+  </view>
+
+  <view wx:if="{{isLoggedIn}}" class="profile-section profile-account-section">
+    <view class="section-heading">
+      <text>资料设置</text>
+      <text class="section-caption">管理你的账户资料</text>
+    </view>
+    <button class="profile-edit-action" bindtap="editProfile">{{requiredSteps.length ? '完善资料' : '编辑资料'}}</button>
+  </view>
+
+  <view wx:if="{{isLoggedIn}}" class="profile-section profile-security-section">
+    <view class="section-heading">
+      <text>账号安全</text>
+      <text class="section-caption">退出后需重新登录</text>
+    </view>
+    <button class="profile-danger-action" bindtap="logout">退出登录</button>
+  </view>
+</scroll-view>

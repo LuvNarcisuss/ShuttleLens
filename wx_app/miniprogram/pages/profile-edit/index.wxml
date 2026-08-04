@@ -1,0 +1,46 @@
+<scroll-view class="page" scroll-y>
+  <view class="profile-edit-header">
+    <text class="heading">完善个人资料</text>
+    <text class="hint">头像和昵称由你主动选择，保存后会同步到账号。</text>
+  </view>
+
+  <view class="profile-form-section">
+    <view class="profile-form-row profile-avatar-row">
+      <view>
+        <text class="label">头像</text>
+        <text class="field-hint">选择一个清晰的个人头像</text>
+      </view>
+      <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{avatarTempPath || avatarUrl}}" class="avatar" src="{{avatarTempPath || avatarUrl}}" mode="aspectFill" />
+      <text wx:else class="avatar-placeholder">选择头像</text>
+      </button>
+    </view>
+  </view>
+
+  <view class="profile-form-section">
+    <view class="profile-form-row profile-nickname-row">
+      <text class="label">昵称</text>
+      <input
+      class="nickname"
+      type="nickname"
+      value="{{nickname}}"
+      placeholder="请输入昵称"
+      bindinput="onNicknameInput"
+      bindblur="onNicknameBlur"
+      />
+      <text wx:if="{{errorMessage}}" class="error">{{errorMessage}}</text>
+    </view>
+  </view>
+
+  <view class="profile-form-section">
+    <view class="profile-form-row phone-row">
+      <view>
+        <text class="label">手机号</text>
+        <text class="phone">{{maskedPhone || '尚未绑定'}}</text>
+      </view>
+      <button class="secondary" open-type="getPhoneNumber" bindgetphonenumber="replacePhone">更换手机号</button>
+    </view>
+  </view>
+
+  <button class="primary" bindtap="submit" loading="{{isLoading}}" disabled="{{isLoading}}">保存资料</button>
+</scroll-view>
