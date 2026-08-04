@@ -52,7 +52,7 @@
 .share-card view { display: flex; flex: 1; flex-direction: column; gap: 8rpx; }
 .share-button { width: 140rpx; }
 .editor-mask { position: fixed; z-index: 20; inset: 0; display: flex; align-items: flex-end; background: rgba(29, 38, 51, .45); }
-.result-sheet { width: 100%; padding: 34rpx 30rpx calc(30rpx + env(safe-area-inset-bottom)); border-radius: 28rpx 28rpx 0 0; background: #FFFFFF; }
+.result-sheet { box-sizing: border-box; width: 100%; padding: 34rpx 30rpx calc(30rpx + env(safe-area-inset-bottom)); border-radius: 28rpx 28rpx 0 0; background: #FFFFFF; }
 .editor-title { display: block; margin-bottom: 24rpx; font-size: 32rpx; font-weight: 700; }
 .editor-time { display: grid; grid-template-columns: 1fr 1fr; gap: 18rpx; }
 .editor-field { margin-top: 18rpx; color: var(--brand-muted); font-size: 23rpx; }

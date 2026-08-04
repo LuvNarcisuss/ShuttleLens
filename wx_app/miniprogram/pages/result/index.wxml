@@ -8,7 +8,7 @@
   <view wx:if="{{pageState === 'loading'}}" class="result-state-card">正在加载任务…</view>
   <view wx:elif="{{pageState === 'pending'}}" class="result-state-card">
     <text>分析仍在进行中</text>
-    <progress percent="{{progress}}" stroke-width="6" activeColor="#13a66b" />
+    <progress percent="{{progress}}" stroke-width="6" activeColor="#12B76A" />
     <text>{{progress}}%</text>
   </view>
   <view wx:elif="{{pageState === 'failed'}}" class="result-state-card error">{{errorMessage}}</view>
