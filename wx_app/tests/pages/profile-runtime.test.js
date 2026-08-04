@@ -12,7 +12,7 @@ function deferred() {
   return { promise, resolve: resolvePromise };
 }
 
-function loadPage({ profile = {}, analysis = {}, auth = {}, token = "", wx = {} } = {}) {
+function loadPage({ profile = {}, analysis = {}, auth = {}, result = {}, token = "", wx = {} } = {}) {
   let definition;
   const source = readFileSync(resolve(pageDirectory, "index.js"), "utf8");
   vm.runInNewContext(source, {
@@ -20,6 +20,7 @@ function loadPage({ profile = {}, analysis = {}, auth = {}, token = "", wx = {} 
       if (request === "../../services/profile") return profile;
       if (request === "../../services/analysis") return analysis;
       if (request === "../../services/auth") return auth;
+      if (request === "../../services/result") return result;
       if (request === "../../services/token") return { getAccessToken: () => token };
       throw new Error(`Unexpected dependency: ${request}`);
     },
@@ -110,6 +111,114 @@ test("completed task opens the independent result page directly", () => {
   page.openTask({ currentTarget: { dataset: { taskId: "task-9" } } });
 
   assert.deepEqual(calls, ["/pages/result/index?task_id=task-9"]);
+});
+
+test("profile page loads the latest succeeded upper-player career snapshot", async () => {
+  const calls = [];
+  const page = loadPage({
+    profile: { getCurrentProfile: async () => ({ id: "player-12345678" }) },
+    analysis: {
+      listTasks: async () => ({
+        items: [
+          { id: "task-running", status: "running", progress: 40 },
+          { id: "task-success", status: "succeeded", progress: 100 },
+          { id: "task-older", status: "failed", progress: 100 },
+        ],
+      }),
+    },
+    result: {
+      getAnalytics: async (taskId) => {
+        calls.push(taskId);
+        return {
+          quality: { confidence: "high" },
+          players: {
+            upper: {
+              average_speed_mps: { value: 2.5, unit: "m/s", available: true },
+              maximum_speed_mps: { value: 4, unit: "m/s", available: true },
+              distance_m: { value: 42.5, unit: "m", available: true },
+              court_coverage_ratio: { value: 0.25, unit: "ratio", available: true },
+              zones: { front: 0.2, mid: 0.5, back: 0.3 },
+              sides: { left: 0.45, right: 0.55 },
+            },
+          },
+        };
+      },
+    },
+  });
+
+  await page.loadPageData();
+
+  assert.deepEqual(calls, ["task-success"]);
+  assert.equal(page.data.latestSucceededTaskId, "task-success");
+  assert.equal(page.data.careerState, "ready");
+  assert.equal(page.data.tasks.length, 2);
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(page.data.careerMetrics.map(({ value, unit }) => [value, unit]))),
+    [
+      ["9.0", "km/h"], ["14.4", "km/h"], ["42.5", "m"],
+      ["25", "%"], ["20", "%"], ["50", "%"],
+      ["30", "%"], ["45", "%"], ["55", "%"],
+    ],
+  );
+});
+
+test("profile page shows empty career metrics when no task has succeeded", async () => {
+  const page = loadPage({
+    profile: { getCurrentProfile: async () => ({ id: "player-123" }) },
+    analysis: { listTasks: async () => ({ items: [{ id: "task-running", status: "running" }] }) },
+  });
+
+  await page.loadPageData();
+
+  assert.equal(page.data.careerState, "empty");
+  assert.equal(page.data.careerMetrics.every((item) => item.value === "—"), true);
+});
+
+test("profile page preserves profile and recent tasks when career analytics is unavailable", async () => {
+  const page = loadPage({
+    profile: { getCurrentProfile: async () => ({ id: "account-123456789", nickname: "羽球小将" }) },
+    analysis: {
+      listTasks: async () => ({
+        items: [
+          { id: "task-success", status: "succeeded", progress: 100 },
+          { id: "task-running", status: "running", progress: 40 },
+          { id: "task-older", status: "failed", progress: 100 },
+        ],
+      }),
+    },
+    result: { getAnalytics: async () => { throw new Error("analytics unavailable"); } },
+  });
+
+  await page.loadPageData();
+
+  assert.equal(page.data.careerState, "unavailable");
+  assert.equal(page.data.careerErrorMessage, "本次结果暂无生涯数据");
+  assert.equal(page.data.displayName, "羽球小将");
+  assert.equal(page.data.accountDisplay, "…23456789");
+  assert.equal(page.data.tasks.length, 2);
+});
+
+test("profile page opens account settings, task list, and latest career result", () => {
+  const calls = [];
+  const page = loadPage({
+    wx: {
+      navigateTo(input) { calls.push(["navigateTo", input.url]); },
+      switchTab(input) { calls.push(["switchTab", input.url]); },
+    },
+  });
+
+  page.editProfile();
+  page.openAccountSettings();
+  page.openAnalysisTasks();
+  page.setData({ latestSucceededTaskId: "task-success" });
+  page.openCareerResult();
+
+  assert.deepEqual(calls, [
+    ["navigateTo", "/pages/profile-edit/index"],
+    ["navigateTo", "/pages/account-settings/index"],
+    ["switchTab", "/pages/tasks/index"],
+    ["navigateTo", "/pages/result/index?task_id=task-success"],
+  ]);
 });
 
 test("profile template has login entry and presents only safe task fields", () => {

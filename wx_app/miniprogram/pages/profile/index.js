@@ -1,6 +1,7 @@
 const { listTasks } = require("../../services/analysis");
 const { logout: clearLocalSession } = require("../../services/auth");
 const { getCurrentProfile } = require("../../services/profile");
+const { getAnalytics } = require("../../services/result");
 const { getAccessToken } = require("../../services/token");
 
 const STATUS_LABELS = {
@@ -13,6 +14,37 @@ const STATUS_LABELS = {
   failed: "失败",
   cancelled: "已取消",
 };
+
+const CAREER_METRICS = [
+  ["average_speed_mps", "平均速度", "speed"],
+  ["maximum_speed_mps", "最高速度", "speed"],
+  ["distance_m", "移动距离", "distance"],
+  ["court_coverage_ratio", "场地覆盖率", "ratio"],
+  ["zones.front", "前场占比", "ratio"],
+  ["zones.mid", "中场占比", "ratio"],
+  ["zones.back", "后场占比", "ratio"],
+  ["sides.left", "左侧占比", "ratio"],
+  ["sides.right", "右侧占比", "ratio"],
+];
+
+function nestedValue(source, path) {
+  return path.split(".").reduce((value, key) => (value == null ? undefined : value[key]), source);
+}
+
+function displayMetric(player, [key, label, kind]) {
+  const raw = nestedValue(player, key);
+  const metric = raw && typeof raw === "object" && "value" in raw ? raw : null;
+  if (metric && metric.available === false) return { key, label, value: "—", unit: kind === "ratio" ? "%" : "" };
+  const numeric = Number(metric ? metric.value : raw);
+  if (!Number.isFinite(numeric)) return { key, label, value: "—", unit: kind === "ratio" ? "%" : "" };
+  if (kind === "speed") return { key, label, value: (numeric * 3.6).toFixed(1), unit: "km/h" };
+  if (kind === "distance") return { key, label, value: numeric.toFixed(1), unit: "m" };
+  return { key, label, value: String(Math.round(numeric * 100)), unit: "%" };
+}
+
+function formatCareerMetrics(player = {}) {
+  return CAREER_METRICS.map((definition) => displayMetric(player, definition));
+}
 
 function safeTask(task) {
   return {
@@ -36,6 +68,11 @@ Page({
     isLoading: true,
     tasks: [],
     errorMessage: "",
+    accountDisplay: "",
+    latestSucceededTaskId: "",
+    careerState: "loading",
+    careerMetrics: formatCareerMetrics(),
+    careerErrorMessage: "",
   },
 
   onShow() {
@@ -43,16 +80,24 @@ Page({
   },
 
   async loadPageData() {
-    this.setData({ isLoading: true, errorMessage: "" });
+    this.setData({ isLoading: true, errorMessage: "", careerState: "loading", careerErrorMessage: "" });
     const [profileResult, tasksResult] = await Promise.allSettled([
       getCurrentProfile(),
       listTasks(),
     ]);
-    const patch = { isLoading: false };
+    const patch = {
+      isLoading: false,
+      accountDisplay: "",
+      latestSucceededTaskId: "",
+      careerState: "empty",
+      careerMetrics: formatCareerMetrics(),
+      careerErrorMessage: "",
+    };
     if (profileResult.status === "fulfilled") {
       const profile = profileResult.value || {};
       patch.profile = profile;
       patch.displayName = profile.nickname || "微信用户";
+      patch.accountDisplay = profile.id == null ? "" : (String(profile.id).length <= 12 ? profile.id : `…${String(profile.id).slice(-8)}`);
       patch.avatarUrl = profile.avatar_url || "";
       patch.maskedPhone = profile.masked_phone || "";
       patch.requiredSteps = Array.isArray(profile.required_steps) ? profile.required_steps : [];
@@ -68,7 +113,19 @@ Page({
     if (tasksResult.status === "fulfilled") {
       const payload = tasksResult.value;
       const items = Array.isArray(payload) ? payload : (payload && payload.items) || [];
-      patch.tasks = items.map(safeTask);
+      patch.tasks = items.slice(0, 2).map(safeTask);
+      const latestSucceededTask = items.find((item) => item.status === "succeeded");
+      if (latestSucceededTask) {
+        try {
+          const analytics = await getAnalytics(latestSucceededTask.id);
+          patch.latestSucceededTaskId = latestSucceededTask.id;
+          patch.careerState = "ready";
+          patch.careerMetrics = formatCareerMetrics((analytics.players || {}).upper || {});
+        } catch (error) {
+          patch.careerState = "unavailable";
+          patch.careerErrorMessage = "本次结果暂无生涯数据";
+        }
+      }
     } else {
       patch.tasks = [];
     }
@@ -108,5 +165,18 @@ Page({
     const task = this.data.tasks.find((item) => item.id === taskId);
     if (!task || task.status !== "succeeded") return;
     wx.navigateTo({ url: `/pages/result/index?task_id=${taskId}` });
+  },
+
+  openAnalysisTasks() {
+    wx.switchTab({ url: "/pages/tasks/index" });
+  },
+
+  openAccountSettings() {
+    wx.navigateTo({ url: "/pages/account-settings/index" });
+  },
+
+  openCareerResult() {
+    if (!this.data.latestSucceededTaskId) return;
+    wx.navigateTo({ url: `/pages/result/index?task_id=${this.data.latestSucceededTaskId}` });
   },
 });
