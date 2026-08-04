@@ -1,6 +1,6 @@
 page { background: var(--brand-bg); color: var(--brand-text); }
-.page { height: 100vh; }
-.task-hero { display: flex; align-items: flex-end; justify-content: space-between; padding: 58rpx 32rpx 34rpx; background: linear-gradient(135deg, #1688FF, #0878E7); color: #FFFFFF; }
+.page { min-height: 100vh; }
+.task-hero { display: flex; align-items: flex-end; justify-content: space-between; padding: 58rpx 32rpx 34rpx; background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-strong)); color: #FFFFFF; }
 .eyebrow { display: block; color: #D9ECFF; font-size: 19rpx; letter-spacing: 4rpx; }
 .title { display: block; margin-top: 10rpx; font-size: 50rpx; font-weight: 760; }
 .subtitle { display: block; margin-top: 10rpx; color: #EAF4FF; font-size: 23rpx; }
@@ -23,7 +23,7 @@ button::after { border: 0; }
 .task-name { flex: 1; overflow: hidden; font-size: 29rpx; font-weight: 680; text-overflow: ellipsis; white-space: nowrap; }
 .task-tag { flex: none; padding: 4rpx 12rpx; border-radius: 999rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 21rpx; }
 .status-queued, .status-running, .status-publishing { background: #EAF4FF; color: var(--brand-primary-strong); }
-.status-succeeded { background: #E7F8EF; color: #098D55; }
+.status-succeeded { background: rgba(18, 183, 106, .12); color: var(--brand-success); }
 .status-failed { background: #FDEBEC; color: var(--brand-danger); }
 .status-cancelled { background: #F1F3F6; color: #677385; }
 .stage { display: block; margin: 8rpx 0 14rpx; color: #677385; font-size: 23rpx; }

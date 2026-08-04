@@ -1,4 +1,4 @@
-<scroll-view class="page brand-page" scroll-y enhanced show-scrollbar="{{false}}">
+<view class="page brand-page">
   <view class="task-hero">
     <view>
       <text class="eyebrow">SHUTTLELENS</text>
@@ -45,4 +45,4 @@
   <view wx:if="{{isLoadingMore}}" class="loading-more">正在加载更多…</view>
   <button wx:elif="{{nextCursor}}" class="load-more" bindtap="loadNextPage">加载更多</button>
   <text wx:if="{{errorMessage}}" class="error">{{errorMessage}}</text>
-</scroll-view>
+</view>
