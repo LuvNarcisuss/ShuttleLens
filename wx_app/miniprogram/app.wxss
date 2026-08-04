@@ -1,0 +1,19 @@
+page {
+  --brand-primary: #1688FF;
+  --brand-primary-strong: #0878E7;
+  --brand-success: #12B76A;
+  --brand-danger: #E5484D;
+  --brand-bg: #F5F7FA;
+  --brand-text: #1D2633;
+  --brand-muted: #8C96A5;
+  --brand-divider: #E3E8EF;
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+}
+
+.brand-page { background: var(--brand-bg); }
+.brand-card { border-radius: 20rpx; background: #FFFFFF; box-shadow: 0 6rpx 20rpx rgba(35, 72, 120, .10); }
+.brand-primary-button { background: var(--brand-primary); color: #FFFFFF; }
+.brand-secondary-button { background: #EAF4FF; color: var(--brand-primary-strong); }
+.brand-status-tag { background: var(--brand-primary); color: #FFFFFF; }

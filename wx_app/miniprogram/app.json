@@ -1,0 +1,27 @@
+{
+  "pages": ["pages/tasks/index", "pages/analyze/index", "pages/profile/index", "pages/login/index", "pages/profile-edit/index", "pages/result/index"],
+  "window": {
+    "navigationBarTitleText": "羽球拍档",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#8C96A5",
+    "selectedColor": "#0878E7",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/tasks/index",
+        "text": "任务",
+        "iconPath": "assets/tabbar/tasks.png",
+        "selectedIconPath": "assets/tabbar/tasks-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "assets/tabbar/profile.png",
+        "selectedIconPath": "assets/tabbar/profile-active.png"
+      }
+    ]
+  }
+}
