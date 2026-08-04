@@ -1,5 +1,5 @@
 {
-  "pages": ["pages/tasks/index", "pages/analyze/index", "pages/profile/index", "pages/login/index", "pages/profile-edit/index", "pages/result/index"],
+  "pages": ["pages/tasks/index", "pages/analyze/index", "pages/profile/index", "pages/login/index", "pages/profile-edit/index", "pages/account-settings/index", "pages/result/index"],
   "window": {
     "navigationBarTitleText": "羽球拍档",
     "navigationBarBackgroundColor": "#FFFFFF",

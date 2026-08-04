@@ -1,0 +1,39 @@
+<scroll-view class="page" scroll-y>
+  <view class="settings-intro">
+    <text class="settings-title">账号设置</text>
+    <text class="settings-subtitle">管理登录方式与账户安全</text>
+  </view>
+
+  <view class="settings-card">
+    <view class="settings-row">
+      <text class="settings-label">账号 ID</text>
+      <text class="settings-value account-value">{{accountId}}</text>
+    </view>
+    <view class="settings-row">
+      <text class="settings-label">手机</text>
+      <text class="settings-value">{{maskedPhone || '未绑定'}}</text>
+      <button class="row-action" open-type="getPhoneNumber" bindgetphonenumber="replacePhone" loading="{{isLoading}}" disabled="{{isLoading}}">{{maskedPhone ? '更换' : '关联'}}</button>
+    </view>
+    <view class="settings-row">
+      <text class="settings-label">微信</text>
+      <text class="settings-value">{{wechatStatus}}</text>
+      <button class="row-action unavailable" disabled>解绑 · 暂未开放</button>
+    </view>
+    <view class="settings-row settings-row-last">
+      <text class="settings-label">密码</text>
+      <text class="settings-value">微信账号暂无密码</text>
+      <button class="row-action unavailable" disabled>重置 · 暂未开放</button>
+    </view>
+  </view>
+
+  <view wx:if="{{isLoading || errorMessage}}" class="settings-feedback">
+    <text wx:if="{{isLoading}}">账号信息加载中…</text>
+    <text wx:if="{{errorMessage}}" class="settings-error">{{errorMessage}}</text>
+  </view>
+
+  <view class="settings-actions">
+    <button class="settings-action identity-action" disabled>切换身份 · 暂未开放</button>
+    <button class="settings-action logout-action" bindtap="confirmLogout" disabled="{{isLoading}}">退出登录</button>
+    <button class="settings-action cancel-action" disabled>账号注销 · 暂未开放</button>
+  </view>
+</scroll-view>

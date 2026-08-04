@@ -12,6 +12,7 @@ test("app uses task center as the first tab and keeps analysis as a routed flow"
     "pages/profile/index",
     "pages/login/index",
     "pages/profile-edit/index",
+    "pages/account-settings/index",
     "pages/result/index",
   ]);
   assert.deepEqual(config.tabBar.list, [
