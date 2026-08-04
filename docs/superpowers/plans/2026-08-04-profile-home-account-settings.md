@@ -243,7 +243,7 @@ git commit -m "feat: add upper-player career snapshot"
 - Modify: `wx_app/miniprogram/pages/profile/index.js`
 - Modify: `wx_app/miniprogram/pages/profile/index.wxml`
 - Modify: `wx_app/miniprogram/pages/profile/index.wxss`
-- Test: `wx_app/tests/pages/profile-runtime.test.js`
+- Modify: `wx_app/tests/pages/profile-runtime.test.js`
 
 **Interfaces:**
 - Consumes: Task 1 data fields `accountDisplay`, `tasks`, `latestSucceededTaskId`, `careerState`, `careerMetrics`, `careerErrorMessage` and its four navigation handlers.
@@ -258,9 +258,13 @@ cd wx_app
 node --import tsx --test tests/pages/profile-runtime.test.js
 ```
 
-Expected: PASS. This task is a user-approved pure WXML/WXSS visual change, so it does not add source-text matching tests.
+Expected: PASS before the intentional removal of the old profile cards. This task does not add new WXML/WXSS source-text matching tests.
 
-- [ ] **Step 2: Replace the hero with the approved profile header**
+- [ ] **Step 2: Align the existing runtime test with the approved removal**
+
+Update `profile-runtime.test.js` only to remove the obsolete `auth.logout` injection, the direct `logout()` test, and source assertions that require the removed profile-data and logout cards. Preserve every unrelated runtime assertion. This is maintenance of existing behavior tests, not a new visual source-text test.
+
+- [ ] **Step 3: Replace the hero with the approved profile header**
 
 Structure `profile/index.wxml` as:
 
@@ -293,7 +297,7 @@ Structure `profile/index.wxml` as:
 
 Use native buttons with `aria-label`; do not add image dependencies for the two compact icons.
 
-- [ ] **Step 3: Build the recent analysis section**
+- [ ] **Step 4: Build the recent analysis section**
 
 Keep current loading, empty, error, progress and result-entry behavior, but change the heading to:
 
@@ -306,7 +310,7 @@ Keep current loading, empty, error, progress and result-entry behavior, but chan
 
 Render only the already-truncated `tasks` array. Preserve `data-task-id` and `bindtap="openTask"`.
 
-- [ ] **Step 4: Add the 3×3 career section**
+- [ ] **Step 5: Add the 3×3 career section**
 
 Append this section after recent analysis:
 
@@ -339,7 +343,7 @@ Append this section after recent analysis:
 
 Delete the old `profile-account-section` and `profile-security-section` markup entirely. In the same step, remove the now-unreachable `clearLocalSession` import and `logout()` method from `profile/index.js`.
 
-- [ ] **Step 5: Implement responsive WXSS**
+- [ ] **Step 6: Implement responsive WXSS**
 
 Use the existing brand variables and these layout contracts:
 
@@ -359,7 +363,7 @@ Use the existing brand variables and these layout contracts:
 
 Ensure the grid works at narrow widths: labels may wrap to two lines, values must not overflow, and units use smaller text. Remove obsolete `.profile-account-section`, `.profile-security-section`, `.profile-edit-action` and `.profile-danger-action` styles.
 
-- [ ] **Step 6: Run profile tests and static event check**
+- [ ] **Step 7: Run profile tests and static event check**
 
 Run:
 
@@ -373,10 +377,10 @@ Then verify every new `bindtap` name exists in `profile/index.js`.
 
 Expected: tests and typecheck PASS; no missing handlers.
 
-- [ ] **Step 7: Commit Task 2**
+- [ ] **Step 8: Commit Task 2**
 
 ```powershell
-git add -- wx_app/miniprogram/pages/profile/index.js wx_app/miniprogram/pages/profile/index.wxml wx_app/miniprogram/pages/profile/index.wxss
+git add -- wx_app/miniprogram/pages/profile/index.js wx_app/miniprogram/pages/profile/index.wxml wx_app/miniprogram/pages/profile/index.wxss wx_app/tests/pages/profile-runtime.test.js
 git diff --cached --check
 git commit -m "feat: refresh profile home layout"
 ```
