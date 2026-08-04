@@ -1,5 +1,4 @@
 const { listTasks } = require("../../services/analysis");
-const { logout: clearLocalSession } = require("../../services/auth");
 const { getCurrentProfile } = require("../../services/profile");
 const { getAnalytics } = require("../../services/result");
 const { getAccessToken } = require("../../services/token");
@@ -143,21 +142,6 @@ Page({
 
   editProfile() {
     wx.navigateTo({ url: "/pages/profile-edit/index" });
-  },
-
-  logout() {
-    clearLocalSession();
-    this.setData({
-      profile: null,
-      displayName: "微信用户",
-      avatarUrl: "",
-      maskedPhone: "",
-      requiredSteps: [],
-      isLoggedIn: false,
-      loginStatus: "未登录",
-      tasks: [],
-      errorMessage: "",
-    });
   },
 
   openTask(event) {

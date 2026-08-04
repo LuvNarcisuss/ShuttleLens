@@ -1,21 +1,32 @@
 <scroll-view class="page" scroll-y>
   <view class="profile-hero">
-    <view class="avatar-shell">
-      <image wx:if="{{avatarUrl}}" class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
-      <text wx:else class="avatar-fallback">羽</text>
+    <view class="hero-actions" wx:if="{{isLoggedIn}}">
+      <button class="hero-icon-button" aria-label="个人信息" bindtap="editProfile">✎</button>
+      <button class="hero-icon-button" aria-label="账号设置" bindtap="openAccountSettings">⚙</button>
     </view>
-    <view class="identity">
-      <text class="name">{{displayName}}</text>
-      <text class="status {{isLoggedIn ? 'online' : ''}}">{{loginStatus}}</text>
-      <text wx:if="{{isLoggedIn && maskedPhone}}" class="phone">{{maskedPhone}}</text>
+    <view class="hero-person">
+      <view class="avatar-shell">
+        <image wx:if="{{avatarUrl}}" class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+        <text wx:else class="avatar-fallback">羽</text>
+      </view>
+      <view class="identity">
+        <text class="name">{{displayName}}</text>
+        <text class="status {{isLoggedIn ? 'online' : ''}}">{{loginStatus}}</text>
+        <text wx:if="{{isLoggedIn && accountDisplay}}" class="account-id">账号 · {{accountDisplay}}</text>
+        <text wx:if="{{isLoggedIn && maskedPhone}}" class="phone">{{maskedPhone}}</text>
+      </view>
     </view>
     <button wx:if="{{!isLoggedIn && !isLoading}}" class="login" bindtap="login">微信快捷登录</button>
+    <button class="analysis-shortcut" bindtap="openAnalysisTasks" aria-label="进入我的分析">
+      <text class="analysis-shortcut-icon">◉</text>
+      <text>我的分析</text>
+    </button>
   </view>
 
   <view class="profile-section">
     <view class="section-heading">
-      <text>最近任务</text>
-      <text class="count">{{tasks.length}} 项</text>
+      <text>最近分析</text>
+      <button class="section-link" bindtap="openAnalysisTasks">查看更多</button>
     </view>
     <view wx:if="{{isLoading}}" class="empty">正在加载…</view>
     <view wx:elif="{{!tasks.length}}" class="empty">暂无分析任务</view>
@@ -38,19 +49,28 @@
     <text class="error" wx:if="{{errorMessage}}">{{errorMessage}}</text>
   </view>
 
-  <view wx:if="{{isLoggedIn}}" class="profile-section profile-account-section">
-    <view class="section-heading">
-      <text>资料设置</text>
-      <text class="section-caption">管理你的账户资料</text>
+  <view class="career-section">
+    <view class="career-heading">
+      <view>
+        <text class="career-title">羽球生涯</text>
+        <text class="career-caption">最近一次分析 · 上半场球员</text>
+      </view>
+      <button wx:if="{{latestSucceededTaskId}}" class="section-link" bindtap="openCareerResult">查看本场详情</button>
     </view>
-    <button class="profile-edit-action" bindtap="editProfile">{{requiredSteps.length ? '完善资料' : '编辑资料'}}</button>
-  </view>
-
-  <view wx:if="{{isLoggedIn}}" class="profile-section profile-security-section">
-    <view class="section-heading">
-      <text>账号安全</text>
-      <text class="section-caption">退出后需重新登录</text>
+    <view wx:if="{{careerState === 'loading'}}" class="career-state">生涯数据加载中…</view>
+    <view wx:elif="{{careerState === 'empty'}}" class="career-state">
+      <text>完成一次分析后，这里会生成你的羽球数据</text>
+      <button class="career-empty-action" bindtap="openAnalysisTasks">开始分析</button>
     </view>
-    <button class="profile-danger-action" bindtap="logout">退出登录</button>
+    <view wx:elif="{{careerState === 'unavailable'}}" class="career-state">{{careerErrorMessage}}</view>
+    <view wx:else class="career-grid">
+      <view class="career-metric" wx:for="{{careerMetrics}}" wx:key="key">
+        <text class="career-label">{{item.label}}</text>
+        <view class="career-value-row">
+          <text class="career-value">{{item.value}}</text>
+          <text wx:if="{{item.value !== '—'}}" class="career-unit">{{item.unit}}</text>
+        </view>
+      </view>
+    </view>
   </view>
 </scroll-view>

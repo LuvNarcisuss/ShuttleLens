@@ -12,14 +12,13 @@ function deferred() {
   return { promise, resolve: resolvePromise };
 }
 
-function loadPage({ profile = {}, analysis = {}, auth = {}, result = {}, token = "", wx = {} } = {}) {
+function loadPage({ profile = {}, analysis = {}, result = {}, token = "", wx = {} } = {}) {
   let definition;
   const source = readFileSync(resolve(pageDirectory, "index.js"), "utf8");
   vm.runInNewContext(source, {
     require(request) {
       if (request === "../../services/profile") return profile;
       if (request === "../../services/analysis") return analysis;
-      if (request === "../../services/auth") return auth;
       if (request === "../../services/result") return result;
       if (request === "../../services/token") return { getAccessToken: () => token };
       throw new Error(`Unexpected dependency: ${request}`);
@@ -81,22 +80,6 @@ test("login entry navigates to the dedicated login page without requesting profi
   page.login();
 
   assert.deepEqual(calls, ["/pages/login/index?redirect=%2Fpages%2Fprofile%2Findex"]);
-});
-
-test("incomplete profile opens profile editor and logout only clears local session", async () => {
-  const calls = [];
-  const page = loadPage({
-    auth: { logout() { calls.push("logout"); } },
-    wx: { navigateTo(input) { calls.push(input.url); } },
-  });
-  page.setData({ isLoggedIn: true, requiredSteps: ["complete_profile"], tasks: [{ id: "task" }] });
-
-  page.editProfile();
-  await page.logout();
-
-  assert.deepEqual(calls, ["/pages/profile-edit/index", "logout"]);
-  assert.equal(page.data.isLoggedIn, false);
-  assert.deepEqual(JSON.parse(JSON.stringify(page.data.tasks)), []);
 });
 
 test("completed task opens the independent result page directly", () => {
@@ -232,8 +215,6 @@ test("profile template has login entry and presents only safe task fields", () =
   assert.match(template, /wx:if="\{\{!isLoggedIn && !isLoading\}\}"[^>]*>微信快捷登录<\/button>/s);
   assert.doesNotMatch(template, /isLoggingIn/);
   assert.match(template, /maskedPhone/);
-  assert.match(template, /完善资料|编辑资料/);
-  assert.match(template, /退出登录/);
   assert.match(template, /item\.statusLabel/);
   assert.match(template, /item\.progress/);
   assert.match(template, /item\.createdAt/);
