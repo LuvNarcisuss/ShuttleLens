@@ -1,0 +1,14 @@
+.page { min-height: 100vh; box-sizing: border-box; padding: 112rpx 40rpx 56rpx; background: linear-gradient(180deg, #edf6ff 0%, var(--brand-bg) 48%, #ffffff 100%); color: var(--brand-text); }
+.login-brand { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 56rpx; }
+.brand-shuttle { width: 152rpx; height: 152rpx; }
+.title { margin-top: 30rpx; font-size: 44rpx; font-weight: 700; color: var(--brand-text); }
+.subtitle { margin-top: 14rpx; color: var(--brand-muted); font-size: 27rpx; }
+.login-panel { padding: 40rpx 32rpx; border-radius: 24rpx; background: #ffffff; box-shadow: 0 12rpx 36rpx rgba(22, 136, 255, .12); }
+.agreement-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; color: var(--brand-muted); font-size: 24rpx; line-height: 42rpx; }
+.link { color: var(--brand-primary); }
+.primary { margin-top: 34rpx; width: 100%; border-radius: 16rpx; background: var(--brand-primary); color: #ffffff; font-weight: 600; }
+.primary::after { border: 0; }
+.stage { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.stage-title { margin-top: 20rpx; font-size: 34rpx; font-weight: 700; color: var(--brand-text); }
+.stage-copy { margin-top: 16rpx; color: var(--brand-muted); font-size: 26rpx; line-height: 42rpx; }
+.error { display: block; margin-top: 24rpx; color: var(--brand-danger); font-size: 25rpx; text-align: center; }

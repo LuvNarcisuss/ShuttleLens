@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="login-brand">
+    <image class="brand-shuttle" src="/assets/brand/shuttle.png" mode="aspectFit" />
+    <text class="title">欢迎使用羽球拍档</text>
+    <text class="subtitle">记录比赛，看见每一次进步</text>
+  </view>
+
+  <view class="login-panel">
+    <checkbox-group bindchange="onAgreementChange">
+      <label class="agreement-row">
+        <checkbox value="agreed" checked="{{agreed}}" color="#13a66b" />
+        <text>我已阅读并同意</text>
+        <text class="link" catchtap="showAgreement">服务协议</text>
+        <text>与</text>
+        <text class="link" catchtap="showPrivacyGuide">隐私保护指引</text>
+      </label>
+    </checkbox-group>
+
+    <button
+      wx:if="{{step === 'agreement' || step === 'wechat_login'}}"
+      class="primary"
+      bindtap="login"
+      loading="{{isLoading}}"
+      disabled="{{isLoading}}"
+    >微信快捷登录</button>
+
+    <view wx:elif="{{step === 'phone_binding'}}" class="stage">
+      <text class="stage-title">绑定手机号</text>
+      <text class="stage-copy">首次登录需要验证手机号，后续登录不会重复请求。</text>
+      <button
+        class="primary"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="bindPhone"
+        loading="{{isLoading}}"
+        disabled="{{isLoading}}"
+      >验证手机号</button>
+    </view>
+
+    <view wx:elif="{{step === 'profile_completion'}}" class="stage">
+      <text class="stage-title">完善头像与昵称</text>
+      <text class="stage-copy">选择头像并填写昵称后即可开始分析。</text>
+      <button class="primary" bindtap="goProfileEdit">继续完善资料</button>
+    </view>
+
+    <view wx:else class="stage">
+      <text class="stage-title">登录完成</text>
+    </view>
+
+    <text wx:if="{{errorMessage}}" class="error">{{errorMessage}}</text>
+  </view>
+</view>
