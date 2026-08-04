@@ -136,8 +136,17 @@ def run_full_analysis(video_file, template_file, corners,
             metadata_content = json.load(f)
 
     detections_file = result["detections"] if os.path.isfile(result["detections"]) else None
+    summary_csv = result["summary_csv"] if os.path.isfile(result["summary_csv"]) else None
+    report_file = result["report"] if os.path.isfile(result["report"]) else None
 
-    return output_video, viz_images or None, metadata_content, detections_file
+    return (
+        output_video,
+        viz_images or None,
+        metadata_content,
+        detections_file,
+        summary_csv,
+        report_file,
+    )
 
 
 _UI_TEXT = {
@@ -174,6 +183,8 @@ _UI_TEXT = {
         "out_gallery": "热力图和散点图",
         "out_metadata": "元数据",
         "out_detections": "检测数据 (JSONL)",
+        "out_summary": "指标摘要 (CSV)",
+        "out_report": "完整分析报告 (HTML)",
         "auto_ok": "自动检测到 {} 个角点。",
         "auto_fail": "自动检测失败 — 请手动点击 4 个角点。",
         "manual_ok": "已应用手动角点（{} 个点）。",
@@ -212,6 +223,8 @@ _UI_TEXT = {
         "out_gallery": "Heatmaps & Scatter Plots",
         "out_metadata": "Metadata",
         "out_detections": "Detections (JSONL)",
+        "out_summary": "Metrics Summary (CSV)",
+        "out_report": "Full Analysis Report (HTML)",
         "auto_ok": "Auto-detected {} corners.",
         "auto_fail": "Auto-detection failed — click 4 corners manually.",
         "manual_ok": "Manual corners applied ({} points).",
@@ -253,6 +266,8 @@ def _switch_language(lang):
         gr.update(label=t["out_gallery"]),
         gr.update(label=t["out_metadata"]),
         gr.update(label=t["out_detections"]),
+        gr.update(label=t["out_summary"]),
+        gr.update(label=t["out_report"]),
     ]
 
 
@@ -314,6 +329,8 @@ def build_ui():
                 output_gallery = gr.Gallery(label=t["out_gallery"], columns=2, height="auto")
                 output_metadata = gr.JSON(label=t["out_metadata"])
                 output_detections = gr.File(label=t["out_detections"])
+                output_summary_csv = gr.File(label=t["out_summary"])
+                output_report = gr.File(label=t["out_report"])
 
         lang_outputs = [
             md_title, md_inputs, video_input, template_input,
@@ -324,6 +341,7 @@ def build_ui():
             md_step1, detect_btn, court_image, corner_status, apply_btn,
             md_step2, run_btn, md_results,
             output_video, output_gallery, output_metadata, output_detections,
+            output_summary_csv, output_report,
         ]
         language.change(fn=_switch_language, inputs=[language], outputs=lang_outputs)
 
@@ -365,7 +383,14 @@ def build_ui():
                 show_player_stats, show_pose_roi, visualize_positions,
                 yolo_pose_model, ball_model,
             ],
-            outputs=[output_video, output_gallery, output_metadata, output_detections],
+            outputs=[
+                output_video,
+                output_gallery,
+                output_metadata,
+                output_detections,
+                output_summary_csv,
+                output_report,
+            ],
         )
 
     return demo

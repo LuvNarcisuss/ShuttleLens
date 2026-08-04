@@ -12,6 +12,7 @@ from badminton_analysis.court.mapper import (
     compute_expanded_roi,
     resolve_court_corners,
 )
+from badminton_analysis.analysis.match_summary import write_analysis_artifacts
 from badminton_analysis.system import BadmintonAnalysisSystem, load_runtime_dependencies
 
 _MAX_WEBUI_OUTPUTS = 10
@@ -267,6 +268,12 @@ def run_analysis(video_path, template_path, corners, options, progress_cb=None):
         vis_dir = os.path.join(output_dir, "position_visualizations")
         analyze_player_positions(system.detections_path, vis_dir, fps=system.fps)
 
+    product_artifacts = write_analysis_artifacts(
+        system.detections_path,
+        system.metadata_path,
+        output_dir,
+    )
+
     web_video_path = _reencode_for_browser(system.output_video_path, output_dir)
 
     result = {
@@ -275,6 +282,7 @@ def run_analysis(video_path, template_path, corners, options, progress_cb=None):
         "metadata": system.metadata_path,
         "detections": system.detections_path,
         "visualizations": [],
+        **product_artifacts,
     }
 
     vis_dir = os.path.join(output_dir, "position_visualizations")

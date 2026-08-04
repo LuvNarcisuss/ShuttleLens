@@ -19,14 +19,17 @@ env/
 .claude/
 .playwright-cli/
 .superpowers/
+.codegraph
+.omo
 AGENTS.md
+CLAUDE.md
 
 # 本地输入和生成输出文件
 results/
 outputs/
 *.log
 
-# 模型权重文件（故意不发布）
+# 模型权重文件
 weights/*
 !weights/.gitkeep
 *.pt
@@ -39,5 +42,5 @@ Thumbs.db
 .idea/
 .vscode/
 
-# 文档文件
-docs/
+# 测试相关文件
+.pytest*
