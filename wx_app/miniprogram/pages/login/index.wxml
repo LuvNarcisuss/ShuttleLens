@@ -8,7 +8,7 @@
   <view class="login-panel">
     <checkbox-group bindchange="onAgreementChange">
       <label class="agreement-row">
-        <checkbox value="agreed" checked="{{agreed}}" color="#13a66b" />
+        <checkbox value="agreed" checked="{{agreed}}" color="#12B76A" />
         <text>我已阅读并同意</text>
         <text class="link" catchtap="showAgreement">服务协议</text>
         <text>与</text>
