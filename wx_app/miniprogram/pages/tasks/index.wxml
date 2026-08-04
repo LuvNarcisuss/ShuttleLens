@@ -1,0 +1,48 @@
+<scroll-view class="page brand-page" scroll-y enhanced show-scrollbar="{{false}}">
+  <view class="task-hero">
+    <view>
+      <text class="eyebrow">SHUTTLELENS</text>
+      <text class="title">开始一场复盘</text>
+      <text class="subtitle">离开页面不会丢失分析进度</text>
+    </view>
+    <button class="create brand-primary-button" bindtap="createAnalysis">新分析</button>
+  </view>
+
+  <scroll-view class="filters" scroll-x show-scrollbar="{{false}}">
+    <button wx:for="{{filters}}" wx:key="value" class="filter {{statusFilter === item.value ? 'active' : ''}}" data-status="{{item.value}}" bindtap="selectFilter">{{item.label}}</button>
+  </scroll-view>
+
+  <view class="summary-line"><text>{{total}} 项任务</text><text>下拉可刷新</text></view>
+  <view wx:if="{{isLoading && !tasks.length}}" class="state">正在同步任务…</view>
+  <view wx:elif="{{!tasks.length}}" class="state empty">
+    <text class="empty-title">还没有分析记录</text>
+    <text>选择一段横屏比赛视频，完成第一次复盘。</text>
+    <button class="empty-action" bindtap="createAnalysis">开始分析</button>
+  </view>
+
+  <view wx:else class="task-list">
+    <view wx:for="{{tasks}}" wx:key="id" class="task-card brand-card" data-task-id="{{item.id}}" bindtap="openTask">
+      <image wx:if="{{item.coverPath}}" class="cover" src="{{item.coverPath}}" mode="aspectFill" />
+      <view wx:else class="cover placeholder"><text>羽</text></view>
+      <view class="task-body">
+        <view class="task-heading"><text class="task-name">{{item.name}}</text><text class="task-tag status-{{item.status}}">{{item.statusLabel}}</text></view>
+        <text class="stage">{{item.stageLabel}}</text>
+        <progress wx:if="{{item.status === 'queued' || item.status === 'running' || item.status === 'publishing'}}" class="task-progress" percent="{{item.progress}}" stroke-width="4" activeColor="#1688FF" backgroundColor="#EAF4FF" />
+        <view class="meta"><text>{{item.durationLabel}}</text><text>{{item.createdLabel}}</text></view>
+        <view wx:if="{{item.status === 'failed'}}" class="failure">
+          <text>{{item.error_message || '分析未完成'}}</text>
+          <text class="hint">{{item.recovery_hint || '可重试或重新分析'}}</text>
+        </view>
+        <view class="actions">
+          <button wx:if="{{item.status === 'queued'}}" class="action" data-task-id="{{item.id}}" data-action="cancel" catchtap="runAction">取消</button>
+          <button wx:if="{{item.status === 'failed'}}" class="action primary" data-task-id="{{item.id}}" data-action="retry" catchtap="runAction">重试</button>
+          <button wx:if="{{item.status === 'failed' || item.status === 'cancelled' || item.status === 'succeeded'}}" class="action" data-task-id="{{item.id}}" data-action="reanalyze" catchtap="runAction">重新分析</button>
+          <button wx:if="{{item.status === 'created' || item.status === 'failed' || item.status === 'cancelled' || item.status === 'succeeded'}}" class="action danger" data-task-id="{{item.id}}" catchtap="deleteTask">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{isLoadingMore}}" class="loading-more">正在加载更多…</view>
+  <button wx:elif="{{nextCursor}}" class="load-more" bindtap="loadNextPage">加载更多</button>
+  <text wx:if="{{errorMessage}}" class="error">{{errorMessage}}</text>
+</scroll-view>
