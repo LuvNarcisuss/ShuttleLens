@@ -53,6 +53,27 @@ test("request does not relogin when logout clears its token before a 401 respons
   );
   assert.equal(relogins, 0);
 });
+test("request retries with a newer token without relogin after a 401", async () => {
+  let currentToken = "old-token";
+  let relogins = 0;
+  const authorizationHeaders = [];
+  const client = createHttpClient({
+    getToken: () => currentToken,
+    relogin: async () => { relogins += 1; },
+    send: async (request) => {
+      authorizationHeaders.push(request.headers.Authorization);
+      if (authorizationHeaders.length === 1) {
+        currentToken = "new-token";
+        return { statusCode: 401, data: { message: "old token expired" } };
+      }
+      return { statusCode: 200, data: { status: "ok" } };
+    },
+  });
+
+  assert.deepEqual(await client.request({ url: "/api/auth/me" }), { status: "ok" });
+  assert.deepEqual(authorizationHeaders, ["Bearer old-token", "Bearer new-token"]);
+  assert.equal(relogins, 0);
+});
 test("request maps non-2xx responses to a business error", async () => {
   const client = createHttpClient({ getToken: () => null, relogin: async () => {}, send: async () => ({ statusCode: 422, data: { code: "INVALID_CODE", message: "无效登录码" } }) });
   await assert.rejects(() => client.request({ url: "/api/auth/wechat/login", method: "POST" }), (error) => error instanceof BusinessError && error.code === "INVALID_CODE");

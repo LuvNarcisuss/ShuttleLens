@@ -22,6 +22,7 @@ page {
 .account-value { color: var(--brand-text); }
 .row-action, .settings-action { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 88rpx; }
 .row-action { flex: 0 0 auto; min-width: 88rpx; margin: 0; padding: 0 20rpx; border-radius: 12rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 23rpx; line-height: 1.2; }
+.row-action-danger { background: #FFF4F4; color: var(--brand-danger); }
 .row-action::after, .settings-action::after { border: 0; }
 .unavailable { background: #F2F4F7; color: var(--brand-muted); }
 .settings-feedback { margin-top: 20rpx; padding: 20rpx 24rpx; border-radius: 14rpx; background: #FFF7E8; color: #9A6700; font-size: 24rpx; line-height: 1.6; }
@@ -32,3 +33,11 @@ page {
 .settings-action[disabled] { opacity: .48; }
 .logout-action { border: 2rpx solid var(--brand-danger); background: #FFFFFF; color: var(--brand-danger); }
 .cancel-action { border: 2rpx solid var(--brand-danger); background: #FFF4F4; color: var(--brand-danger); }
+.password-modal-mask { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 32rpx; box-sizing: border-box; background: rgba(16, 24, 40, .45); }
+.password-modal { width: 100%; box-sizing: border-box; padding: 32rpx; border-radius: 24rpx; background: #FFFFFF; }
+.password-modal-title { display: block; color: var(--brand-text); font-size: 32rpx; font-weight: 700; }
+.password-input { height: 88rpx; margin-top: 20rpx; padding: 0 24rpx; box-sizing: border-box; border: 1rpx solid var(--brand-divider); border-radius: 12rpx; color: var(--brand-text); font-size: 26rpx; }
+.password-modal-actions { display: flex; gap: 16rpx; margin-top: 28rpx; }
+.password-modal-button { flex: 1; margin: 0; border-radius: 12rpx; font-size: 26rpx; }
+.password-cancel { background: #F2F4F7; color: var(--brand-muted); }
+.password-confirm { background: var(--brand-primary); color: #FFFFFF; }

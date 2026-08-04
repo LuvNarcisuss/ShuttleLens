@@ -17,45 +17,14 @@
       </view>
     </view>
     <button wx:if="{{!isLoggedIn && !isLoading}}" class="login" bindtap="login">微信快捷登录</button>
-    <button class="analysis-shortcut" bindtap="openAnalysisTasks" aria-label="进入我的分析">
-      <text class="analysis-shortcut-icon">◉</text>
-      <text>我的分析</text>
-    </button>
-  </view>
-
-  <view class="profile-section">
-    <view class="section-heading">
-      <text>最近分析</text>
-      <button class="section-link" bindtap="openAnalysisTasks">查看更多</button>
-    </view>
-    <view wx:if="{{tasksState === 'loading'}}" class="empty">正在加载…</view>
-    <view wx:elif="{{tasksState === 'unavailable'}}" class="empty error">{{taskErrorMessage}}</view>
-    <view wx:elif="{{tasksState === 'empty'}}" class="empty">暂无分析任务</view>
-    <view wx:else class="task-list">
-      <view class="task" wx:for="{{tasks}}" wx:key="id">
-        <view class="task-top">
-          <text class="task-id">任务 {{item.id}}</text>
-          <text class="badge status-{{item.status}}">{{item.statusLabel}}</text>
-        </view>
-        <view class="progress-row">
-          <progress class="progress" percent="{{item.progress}}" stroke-width="5" activeColor="#1688FF" backgroundColor="#E3E8EF" />
-          <text>{{item.progress}}%</text>
-        </view>
-        <view class="task-bottom">
-          <text>{{item.createdAt}}</text>
-          <button wx:if="{{item.status === 'succeeded'}}" class="preview" data-task-id="{{item.id}}" bindtap="openTask">查看结果</button>
-        </view>
-      </view>
-    </view>
   </view>
 
   <view class="career-section">
     <view class="career-heading">
       <view>
         <text class="career-title">羽球生涯</text>
-        <text class="career-caption">最近一次分析 · 上半场球员</text>
       </view>
-      <button wx:if="{{latestSucceededTaskId}}" class="section-link" bindtap="openCareerResult">查看本场详情</button>
+      <picker range="{{dateRangeOptions}}" range-key="label" value="{{selectedDateRangeIndex}}" bindchange="onDateRangeChange"><view class="career-range">{{dateRangeOptions[selectedDateRangeIndex].label}} ▼</view></picker>
     </view>
     <view wx:if="{{careerState === 'loading'}}" class="career-state">生涯数据加载中…</view>
     <view wx:elif="{{careerState === 'empty'}}" class="career-state">
@@ -63,12 +32,27 @@
       <button class="career-empty-action" bindtap="openAnalysisTasks">开始分析</button>
     </view>
     <view wx:elif="{{careerState === 'unavailable'}}" class="career-state">{{careerErrorMessage}}</view>
-    <view wx:else class="career-grid">
-      <view class="career-metric" wx:for="{{careerMetrics}}" wx:key="key">
-        <text class="career-label">{{item.label}}</text>
-        <view class="career-value-row">
-          <text class="career-value">{{item.value}}</text>
-          <text wx:if="{{item.value !== '—'}}" class="career-unit">{{item.unit}}</text>
+    <view wx:else>
+      <view class="career-record-grid">
+        <view class="career-record-metric career-record-{{item.key}}" wx:for="{{careerRecordMetrics}}" wx:key="key">
+          <text class="career-record-value">{{item.value}}</text>
+          <text class="career-record-label">{{item.label}}</text>
+        </view>
+      </view>
+      <view class="career-grid">
+        <view class="career-metric" wx:for="{{careerPerformanceMetrics}}" wx:key="key">
+          <text class="career-label">{{item.label}}</text>
+          <view class="career-value-row">
+            <text class="career-value">{{item.value}}</text>
+            <text wx:if="{{item.value !== '—'}}" class="career-unit">{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="career-recent" wx:if="{{recentMatches.length}}">
+        <text class="career-recent-title">最近比赛</text>
+        <view class="career-recent-row" wx:for="{{recentMatches}}" wx:key="id">
+          <text class="career-recent-name">{{item.name}}</text>
+          <text class="career-result career-result-{{item.resultClass}}">{{item.result}}</text>
         </view>
       </view>
     </view>

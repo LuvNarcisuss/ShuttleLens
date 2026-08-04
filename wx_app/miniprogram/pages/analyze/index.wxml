@@ -60,9 +60,27 @@
     </view>
   </view>
 
+  <view class="card analysis-step-card">
+    <view class="card-heading"><text class="step step-index">04</text><text>确定球员</text></view>
+    <text class="hint player-choice-hint">请选择视频中哪一方是自己；跳过后仍可查看结果，但不会计入羽球生涯。</text>
+    <view class="player-choice-grid">
+      <button class="player-choice {{playerSelection === 'upper' ? 'player-choice-active' : ''}}" data-position="upper" bindtap="onSelectPlayer">上方球员是我</button>
+      <button class="player-choice {{playerSelection === 'lower' ? 'player-choice-active' : ''}}" data-position="lower" bindtap="onSelectPlayer">下方球员是我</button>
+    </view>
+    <button class="player-skip {{playerSelection === 'skip' ? 'player-skip-active' : ''}}" data-position="skip" bindtap="onSelectPlayer">跳过</button>
+    <view wx:if="{{playerSelection && playerSelection !== 'skip'}}" class="match-result-choice">
+      <text class="match-result-title">比赛结果</text>
+      <view class="match-result-grid">
+        <button class="match-result win {{matchResult === 'win' ? 'match-result-active' : ''}}" data-result="win" bindtap="onSelectMatchResult">胜</button>
+        <button class="match-result loss {{matchResult === 'loss' ? 'match-result-active' : ''}}" data-result="loss" bindtap="onSelectMatchResult">负</button>
+        <button class="match-result draw {{matchResult === 'draw' ? 'match-result-active' : ''}}" data-result="draw" bindtap="onSelectMatchResult">平</button>
+      </view>
+    </view>
+  </view>
+
   <view class="card analysis-step-card start-card">
-    <view class="card-heading"><text class="step step-index">04</text><text>开始分析</text></view>
-    <button class="primary" bindtap="startAnalysis" disabled="{{isRunning || corners.length !== 4}}">开始分析</button>
+    <view class="card-heading"><text class="step step-index">05</text><text>开始分析</text></view>
+    <button class="primary" bindtap="startAnalysis" disabled="{{isRunning || corners.length !== 4 || !playerSelection || (playerSelection !== 'skip' && !matchResult)}}">开始分析</button>
     <text class="hint">提交后可离开本页，进度和结果会保留在任务中心。</text>
     <view class="progress-block" wx:if="{{taskId}}"><view class="progress-meta"><text>{{taskStatus}}</text><text>{{progress}}%</text></view><progress percent="{{progress}}" stroke-width="6" activeColor="#1688FF" backgroundColor="#E3E8EF" /></view>
     <text class="error" wx:if="{{failureMessage}}">{{failureMessage}}</text>

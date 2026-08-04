@@ -4,20 +4,15 @@
     <text class="hint">头像和昵称由你主动选择，保存后会同步到账号。</text>
   </view>
 
-  <view class="profile-form-section">
+  <view class="profile-form-card">
     <view class="profile-form-row profile-avatar-row">
-      <view>
-        <text class="label">头像</text>
-        <text class="field-hint">选择一个清晰的个人头像</text>
-      </view>
+      <text class="label">头像</text>
       <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar" disabled="{{isLoading}}">
         <image wx:if="{{avatarTempPath || avatarUrl}}" class="avatar" src="{{avatarTempPath || avatarUrl}}" mode="aspectFill" />
         <text wx:else class="avatar-placeholder">选择头像</text>
       </button>
     </view>
-  </view>
-
-  <view class="profile-form-section">
+    <view class="profile-form-divider"></view>
     <view class="profile-form-row profile-nickname-row">
       <text class="label">昵称</text>
       <input
@@ -29,16 +24,6 @@
         bindblur="onNicknameBlur"
         disabled="{{isLoading}}"
       />
-    </view>
-  </view>
-
-  <view class="profile-form-section">
-    <view class="profile-form-row phone-row">
-      <view>
-        <text class="label">手机号</text>
-        <text class="phone">{{maskedPhone || '尚未绑定'}}</text>
-      </view>
-      <button class="secondary" open-type="getPhoneNumber" bindgetphonenumber="replacePhone" disabled="{{isLoading}}">更换手机号</button>
     </view>
   </view>
 

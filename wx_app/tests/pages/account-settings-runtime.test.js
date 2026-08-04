@@ -95,3 +95,55 @@ test("only logs out after the user confirms the logout modal", () => {
   modals[1].success({ confirm: true });
   assert.deepEqual(calls, ["logout", ["switchTab", "/pages/profile/index"]]);
 });
+
+test("confirms WeChat unlink and updates the bound state", async () => {
+  const calls = [];
+  const modals = [];
+  const page = loadPage({
+    auth: {
+      async unbindWechat() { calls.push("unbindWechat"); return { wechat_bound: false }; },
+    },
+    wx: { showModal(options) { modals.push(options); } },
+  });
+  page.setData({ isLoading: false, wechatBound: true });
+
+  page.onWechatAction();
+  modals[0].success({ confirm: true });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.deepEqual(calls, ["unbindWechat"]);
+  assert.equal(page.data.wechatBound, false);
+  assert.equal(page.data.wechatStatus, "未绑定");
+});
+
+test("switch account logs out and returns to the login page", () => {
+  const calls = [];
+  const page = loadPage({
+    auth: { logout() { calls.push("logout"); } },
+    wx: { reLaunch({ url }) { calls.push(["reLaunch", url]); } },
+  });
+  page.setData({ isLoading: false });
+
+  page.onSwitchAccount();
+
+  assert.deepEqual(calls, ["logout", ["reLaunch", "/pages/login/index"]]);
+});
+
+test("deactivation requires confirmation and then clears the local session", async () => {
+  const calls = [];
+  const modals = [];
+  const page = loadPage({
+    auth: {
+      async deactivateAccount() { calls.push("deactivateAccount"); },
+      logout() { calls.push("logout"); },
+    },
+    wx: { showModal(options) { modals.push(options); }, reLaunch({ url }) { calls.push(["reLaunch", url]); } },
+  });
+  page.setData({ isLoading: false });
+
+  page.onDeactivate();
+  modals[0].success({ confirm: true });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.deepEqual(calls, ["deactivateAccount", "logout", ["reLaunch", "/pages/login/index"]]);
+});

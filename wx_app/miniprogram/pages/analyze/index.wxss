@@ -1,6 +1,6 @@
 page { background: var(--brand-bg); color: var(--brand-text); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
 .page { height: 100vh; }
-.analysis-hero { padding: 64rpx 36rpx 48rpx; background: linear-gradient(145deg, var(--brand-primary-strong), var(--brand-primary)); color: #FFFFFF; }
+.analysis-hero { padding: 64rpx 36rpx 48rpx; border-radius: 0 0 34rpx 34rpx; background: linear-gradient(145deg, var(--brand-primary-strong), var(--brand-primary)); color: #FFFFFF; }
 .eyebrow { display: block; color: #D9EDFF; font-size: 20rpx; letter-spacing: 4rpx; }
 .title { display: block; margin-top: 12rpx; font-size: 52rpx; font-weight: 700; }
 .subtitle { display: block; margin-top: 14rpx; color: #EAF4FF; font-size: 26rpx; line-height: 1.6; }
@@ -48,3 +48,16 @@ button::after { border: 0; }
 .progress-block { margin-top: 24rpx; }
 .progress-meta { display: flex; justify-content: space-between; margin-bottom: 12rpx; color: #526173; font-size: 24rpx; }
 .start-card { margin-bottom: calc(48rpx + env(safe-area-inset-bottom)); }
+.player-choice-hint { margin-top: -6rpx; }
+.player-choice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; margin-top: 22rpx; }
+.player-choice { min-height: 112rpx; padding: 16rpx; border: 2rpx solid var(--brand-divider); background: #FFFFFF; color: var(--brand-text); font-size: 25rpx; }
+.player-choice-active { border-color: var(--brand-primary); background: #EAF4FF; color: var(--brand-primary-strong); font-weight: 650; }
+.player-skip { width: 100%; min-height: 72rpx; margin-top: 16rpx; background: transparent; color: var(--brand-muted); font-size: 24rpx; }
+.player-skip-active { color: var(--brand-primary-strong); font-weight: 650; }
+.match-result-choice { margin-top: 22rpx; padding-top: 20rpx; border-top: 1rpx solid var(--brand-divider); }
+.match-result-title { display: block; margin-bottom: 14rpx; color: var(--brand-text); font-size: 25rpx; font-weight: 650; }
+.match-result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14rpx; }
+.match-result { min-height: 84rpx; border: 2rpx solid var(--brand-divider); background: #FFFFFF; color: var(--brand-muted); font-size: 26rpx; }
+.match-result-active.win { border-color: var(--brand-success); background: #E6F8EF; color: var(--brand-success); font-weight: 700; }
+.match-result-active.loss { border-color: var(--brand-danger); background: #FFF0F0; color: var(--brand-danger); font-weight: 700; }
+.match-result-active.draw { border-color: #F59E0B; background: #FFF7E8; color: #D97706; font-weight: 700; }

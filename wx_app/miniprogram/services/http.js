@@ -14,7 +14,13 @@ function createHttpClient(dependencies) {
     const token = dependencies.getToken();
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await dependencies.send({ ...input, headers });
-    if (response.statusCode === 401 && !retried && token && dependencies.getToken()) { await dependencies.relogin(); return request(input, true); }
+    if (response.statusCode === 401 && !retried && token) {
+      const currentToken = dependencies.getToken();
+      if (currentToken) {
+        if (currentToken === token) await dependencies.relogin();
+        return request(input, true);
+      }
+    }
     if (response.statusCode < 200 || response.statusCode >= 300) { throw toBusinessError(response); }
     return response.data;
   }

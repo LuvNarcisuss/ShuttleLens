@@ -1,6 +1,6 @@
 .page { box-sizing: border-box; height: 100vh; background: var(--brand-bg); color: var(--brand-text); }
 .content { padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); }
-.result-hero { padding: 58rpx 34rpx 38rpx; background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-strong)); color: #FFFFFF; }
+.result-hero { padding: 58rpx 34rpx 38rpx; border-radius: 0 0 34rpx 34rpx; background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-strong)); color: #FFFFFF; }
 .eyebrow { display: block; color: #D9ECFF; font-size: 20rpx; letter-spacing: 4rpx; }
 .title { display: block; margin-top: 10rpx; font-size: 46rpx; font-weight: 760; }
 .task-id { display: block; margin-top: 12rpx; color: #EAF4FF; font-size: 23rpx; }
@@ -8,8 +8,6 @@
 .result-state-card { display: flex; flex-direction: column; gap: 20rpx; color: var(--brand-muted); text-align: center; }
 .result-state-card.error, .resource-error { color: var(--brand-danger); }
 .card-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24rpx; color: var(--brand-text); font-size: 30rpx; font-weight: 700; }
-.fullscreen { margin: 0; padding: 0 22rpx; border-radius: 12rpx; background: var(--brand-primary); color: #FFFFFF; font-size: 23rpx; font-weight: 650; line-height: 62rpx; }
-.fullscreen::after { border: 0; }
 .video { width: 100%; border-radius: 14rpx; background: #000; }
 .image-list { display: flex; flex-direction: column; gap: 20rpx; }
 .chart-item { padding-bottom: 22rpx; border-bottom: 1rpx solid var(--brand-divider); }
@@ -64,5 +62,5 @@
 .editor-actions { display: flex; gap: 16rpx; margin-top: 28rpx; }
 .editor-actions button { flex: 1; margin: 0; }
 .editor-actions .secondary { background: #F1F3F6; color: var(--brand-muted); }
-.fullscreen, .save-button, .settings-button, .scope-tab, .player-switch text, .highlight-main, .edit-button, .restore, .editor-actions button { box-sizing: border-box; min-height: 88rpx; }
-.fullscreen, .save-button, .settings-button, .scope-tab, .player-switch text, .edit-button, .restore, .editor-actions button { display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+.save-button, .settings-button, .scope-tab, .player-switch text, .highlight-main, .edit-button, .restore, .editor-actions button { box-sizing: border-box; min-height: 88rpx; }
+.save-button, .settings-button, .scope-tab, .player-switch text, .edit-button, .restore, .editor-actions button { display: flex; align-items: center; justify-content: center; line-height: 1.2; }

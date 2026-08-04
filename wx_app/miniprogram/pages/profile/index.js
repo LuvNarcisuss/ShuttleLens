@@ -1,6 +1,5 @@
-const { listTasks } = require("../../services/analysis");
+const { getCareerStats } = require("../../services/analysis");
 const { getCurrentProfile } = require("../../services/profile");
-const { getAnalytics } = require("../../services/result");
 const { getAccessToken } = require("../../services/token");
 
 const STATUS_LABELS = {
@@ -14,58 +13,39 @@ const STATUS_LABELS = {
   cancelled: "已取消",
 };
 
-const CAREER_METRICS = [
-  ["average_speed_mps", "平均速度", "speed"],
-  ["maximum_speed_mps", "最高速度", "speed"],
-  ["distance_m", "移动距离", "distance"],
-  ["court_coverage_ratio", "场地覆盖率", "ratio"],
-  ["zones.front", "前场占比", "ratio"],
-  ["zones.mid", "中场占比", "ratio"],
-  ["zones.back", "后场占比", "ratio"],
-  ["sides.left", "左侧占比", "ratio"],
-  ["sides.right", "右侧占比", "ratio"],
+const DATE_RANGE_OPTIONS = [
+  { value: 'week', label: '最近一周' },
+  { value: 'month', label: '最近一个月' },
+  { value: 'three_months', label: '最近三个月' },
+  { value: 'six_months', label: '最近半年' },
+  { value: 'year', label: '最近一年' },
+  { value: 'all', label: '全部' },
 ];
 
-function nestedValue(source, path) {
-  return path.split(".").reduce((value, key) => (value == null ? undefined : value[key]), source);
-}
-
-function displayMetric(player, [key, label, kind]) {
-  const raw = nestedValue(player, key);
-  const metric = raw && typeof raw === "object" && "value" in raw ? raw : null;
-  if (metric && metric.available === false) return { key, label, value: "—", unit: kind === "ratio" ? "%" : "" };
-  const numeric = Number(metric ? metric.value : raw);
-  if (!Number.isFinite(numeric)) return { key, label, value: "—", unit: kind === "ratio" ? "%" : "" };
-  if (kind === "speed") return { key, label, value: (numeric * 3.6).toFixed(1), unit: "km/h" };
-  if (kind === "distance") return { key, label, value: numeric.toFixed(1), unit: "m" };
-  return { key, label, value: String(Math.round(numeric * 100)), unit: "%" };
-}
-
-function formatCareerMetrics(player = {}) {
-  return CAREER_METRICS.map((definition) => displayMetric(player, definition));
-}
-
-function hasCareerData(player) {
-  if (!player || typeof player !== "object" || Array.isArray(player)) return false;
-  return CAREER_METRICS.some(([key]) => {
-    const raw = nestedValue(player, key);
-    const metric = raw && typeof raw === "object" && "value" in raw ? raw : null;
-    if (metric) return metric.available === false || Number.isFinite(Number(metric.value));
-    return raw !== null && raw !== "" && Number.isFinite(Number(raw));
-  });
-}
-
-function safeTask(task) {
-  return {
-    id: task.id,
-    status: task.status,
-    statusLabel: STATUS_LABELS[task.status] || "未知状态",
-    progress: Number(task.progress) || 0,
-    createdAt: task.created_at || "",
-  };
+function formatCareerMetrics(stats = {}) {
+  const number = (value, digits = 0) => Number.isFinite(value) ? Number(value).toFixed(digits) : "—";
+  const duration = Number(stats.total_duration_sec);
+  const durationLabel = Number.isFinite(duration)
+    ? (duration >= 60 ? `${Math.floor(duration / 60)}分${Math.round(duration % 60)}秒` : `${Math.round(duration)}秒`)
+    : "—";
+  return [
+    { key: "total_matches", label: "比赛场次", value: number(stats.total_matches), unit: "场" },
+    { key: "win_count", label: "胜", value: number(stats.win_count), unit: "" },
+    { key: "loss_count", label: "负", value: number(stats.loss_count), unit: "" },
+    { key: "draw_count", label: "平", value: number(stats.draw_count), unit: "" },
+    { key: "win_rate", label: "胜率", value: Number.isFinite(stats.win_rate) ? `${(stats.win_rate * 100).toFixed(0)}%` : "—", unit: "" },
+    { key: "total_duration", label: "总时长", value: durationLabel, unit: "" },
+    { key: "total_rallies", label: "有效回合", value: number(stats.total_rallies), unit: "次" },
+    { key: "average_speed", label: "平均速度", value: number(stats.avg_speed_mps * 3.6, 1), unit: "km/h" },
+    { key: "maximum_speed", label: "最高速度", value: number(stats.max_speed_mps * 3.6, 1), unit: "km/h" },
+    { key: "total_distance", label: "移动距离", value: number(stats.total_distance_m, 0), unit: "m" },
+    { key: "coverage", label: "平均覆盖", value: number(stats.avg_court_coverage * 100, 0), unit: "%" },
+  ];
 }
 
 Page({
+  _loadGeneration: 0,
+
   data: {
     profile: null,
     displayName: "微信用户",
@@ -75,22 +55,23 @@ Page({
     isLoggedIn: false,
     loginStatus: "未登录",
     isLoading: true,
-    tasks: [],
-    tasksState: "loading",
-    taskErrorMessage: "",
     errorMessage: "",
     accountDisplay: "",
-    latestSucceededTaskId: "",
+    // 生涯统计相关
+    dateRangeOptions: DATE_RANGE_OPTIONS,
+    selectedDateRange: 'all',
+    selectedDateRangeIndex: 5,  // 默认"全部"
     careerState: "loading",
+    careerStats: null,
     careerMetrics: formatCareerMetrics(),
+    careerRecordMetrics: formatCareerMetrics().slice(0, 5),
+    careerPerformanceMetrics: formatCareerMetrics().slice(5),
+    recentMatches: [],
     careerErrorMessage: "",
   },
 
   onShow() {
-    return this.loadPageData();
-  },
-
-  async loadPageData() {
+    // 如果未登录，立即清空数据（确保退出登录后数据清零）
     if (!getAccessToken()) {
       this.setData({
         profile: null,
@@ -101,14 +82,44 @@ Page({
         isLoggedIn: false,
         loginStatus: "未登录",
         isLoading: false,
-        tasks: [],
-        tasksState: "empty",
-        taskErrorMessage: "",
         errorMessage: "",
         accountDisplay: "",
-        latestSucceededTaskId: "",
         careerState: "empty",
+        careerStats: null,
         careerMetrics: formatCareerMetrics(),
+        careerRecordMetrics: formatCareerMetrics().slice(0, 5),
+        careerPerformanceMetrics: formatCareerMetrics().slice(5),
+        recentMatches: [],
+        careerErrorMessage: "",
+      });
+      return;
+    }
+    return this.loadPageData();
+  },
+
+  async loadPageData() {
+    const generation = this._loadGeneration + 1;
+    this._loadGeneration = generation;
+    const isCurrentGeneration = () => this._loadGeneration === generation;
+
+    if (!getAccessToken()) {
+      this.setData({
+        profile: null,
+        displayName: "微信用户",
+        avatarUrl: "",
+        maskedPhone: "",
+        requiredSteps: [],
+        isLoggedIn: false,
+        loginStatus: "未登录",
+        isLoading: false,
+        errorMessage: "",
+        accountDisplay: "",
+        careerState: "empty",
+        careerStats: null,
+        careerMetrics: formatCareerMetrics(),
+        careerRecordMetrics: formatCareerMetrics().slice(0, 5),
+        careerPerformanceMetrics: formatCareerMetrics().slice(5),
+        recentMatches: [],
         careerErrorMessage: "",
       });
       return;
@@ -116,8 +127,6 @@ Page({
 
     this.setData({
       isLoading: true,
-      tasksState: "loading",
-      taskErrorMessage: "",
       errorMessage: "",
       careerState: "loading",
       careerErrorMessage: "",
@@ -125,11 +134,12 @@ Page({
 
     const profileRequest = getCurrentProfile()
       .then((profileValue) => {
+        if (!isCurrentGeneration()) return;
         const profile = profileValue || {};
         this.setData({
           profile,
           displayName: profile.nickname || "微信用户",
-          accountDisplay: profile.id == null ? "" : (String(profile.id).length <= 12 ? profile.id : `…${String(profile.id).slice(-8)}`),
+          accountDisplay: profile.account_number || "",
           avatarUrl: profile.avatar_url || "",
           maskedPhone: profile.masked_phone || "",
           requiredSteps: Array.isArray(profile.required_steps) ? profile.required_steps : [],
@@ -140,6 +150,7 @@ Page({
         if (typeof wx.setStorageSync === "function") wx.setStorageSync("current_user", profile);
       })
       .catch(() => {
+        if (!isCurrentGeneration()) return;
         this.setData({
           profile: null,
           displayName: "微信用户",
@@ -153,52 +164,113 @@ Page({
         });
       });
 
-    const tasksRequest = listTasks()
-      .then(async (payload) => {
-        const items = Array.isArray(payload) ? payload : (payload && payload.items) || [];
-        const tasks = items.slice(0, 2).map(safeTask);
-        const latestSucceededTask = items.find((item) => item.status === "succeeded");
-        this.setData({
-          tasks,
-          tasksState: tasks.length ? "ready" : "empty",
-          taskErrorMessage: "",
-          latestSucceededTaskId: "",
-          careerState: latestSucceededTask ? "loading" : "empty",
-          careerMetrics: formatCareerMetrics(),
-          careerErrorMessage: "",
-        });
-        if (!latestSucceededTask) return;
-
-        try {
-          const analytics = await getAnalytics(latestSucceededTask.id);
-          const player = analytics && analytics.players && analytics.players.upper;
-          if (!hasCareerData(player)) {
-            this.setData({ careerState: "unavailable", careerErrorMessage: "本次结果暂无生涯数据" });
-            return;
-          }
-          this.setData({
-            latestSucceededTaskId: latestSucceededTask.id,
-            careerState: "ready",
-            careerMetrics: formatCareerMetrics(player),
-            careerErrorMessage: "",
-          });
-        } catch (error) {
-          this.setData({ careerState: "unavailable", careerErrorMessage: "本次结果暂无生涯数据" });
-        }
-      })
+    const careerRequest = this.loadCareerStats(this.data.selectedDateRange)
       .catch(() => {
+        if (!isCurrentGeneration()) return;
         this.setData({
-          tasks: [],
-          tasksState: "unavailable",
-          taskErrorMessage: "最近分析加载失败，请稍后重试",
-          latestSucceededTaskId: "",
           careerState: "unavailable",
+          careerStats: null,
           careerMetrics: formatCareerMetrics(),
+          careerRecordMetrics: formatCareerMetrics().slice(0, 5),
+          careerPerformanceMetrics: formatCareerMetrics().slice(5),
+          recentMatches: [],
           careerErrorMessage: "生涯数据加载失败，请稍后重试",
         });
       });
 
-    await Promise.allSettled([profileRequest, tasksRequest]);
+    await Promise.allSettled([profileRequest, careerRequest]);
+  },
+
+  async loadCareerStats(dateRange = 'all') {
+    const generation = this._loadGeneration;
+    const isCurrentGeneration = () => this._loadGeneration === generation;
+
+    this.setData({ careerState: "loading", careerErrorMessage: "" });
+
+    try {
+      const stats = await getCareerStats(dateRange);
+      if (!isCurrentGeneration()) return;
+
+      if (!stats || stats.total_matches === 0) {
+        const careerMetrics = formatCareerMetrics(stats);
+        this.setData({
+          careerState: "empty",
+          careerStats: null,
+          careerMetrics,
+          careerRecordMetrics: careerMetrics.slice(0, 5),
+          careerPerformanceMetrics: careerMetrics.slice(5),
+          recentMatches: [],
+          careerErrorMessage: "",
+        });
+        return;
+      }
+
+      const careerMetrics = formatCareerMetrics(stats);
+      this.setData({
+        careerState: "ready",
+        careerStats: {
+          totalMatches: stats.total_matches,
+          matchedMatches: stats.matched_matches,
+          totalDuration: this.formatDuration(stats.total_duration_sec),
+          totalRallies: stats.total_rallies,
+          avgSpeed: (stats.avg_speed_mps * 3.6).toFixed(1),
+          maxSpeed: (stats.max_speed_mps * 3.6).toFixed(1),
+          totalDistance: stats.total_distance_m.toFixed(0),
+          avgCoverage: (stats.avg_court_coverage * 100).toFixed(1),
+          winCount: stats.win_count,
+          lossCount: stats.loss_count,
+          drawCount: stats.draw_count,
+          winRate: stats.win_rate ? (stats.win_rate * 100).toFixed(1) + '%' : '-',
+          recentMatches: stats.recent_matches || [],
+        },
+        careerMetrics,
+        careerRecordMetrics: careerMetrics.slice(0, 5),
+        careerPerformanceMetrics: careerMetrics.slice(5),
+        recentMatches: (stats.recent_matches || []).map((item) => ({
+          id: item.task_id,
+          name: item.name || "未命名分析",
+          result: item.match_result === "win" ? "胜" : item.match_result === "loss" ? "负" : "平",
+          resultClass: item.match_result || "draw",
+        })),
+        careerErrorMessage: "",
+      });
+    } catch (error) {
+      if (!isCurrentGeneration()) return;
+      this.setData({
+        careerState: "unavailable",
+        careerStats: null,
+        careerMetrics: formatCareerMetrics(),
+        careerRecordMetrics: formatCareerMetrics().slice(0, 5),
+        careerPerformanceMetrics: formatCareerMetrics().slice(5),
+        recentMatches: [],
+        careerErrorMessage: "生涯数据加载失败，请稍后重试",
+      });
+    }
+  },
+
+  formatDuration(seconds) {
+    if (!seconds || seconds <= 0) return '0秒';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    if (hours > 0) {
+      return `${hours}小时${minutes}分`;
+    }
+    if (minutes > 0) {
+      return `${minutes}分${secs}秒`;
+    }
+    return `${secs}秒`;
+  },
+
+  onDateRangeChange(e) {
+    const index = Number(e.detail.value);
+    const range = DATE_RANGE_OPTIONS[index].value;
+    this.setData({
+      selectedDateRange: range,
+      selectedDateRangeIndex: index,
+    });
+    this.loadCareerStats(range);
   },
 
   login() {
@@ -211,13 +283,6 @@ Page({
     wx.navigateTo({ url: "/pages/profile-edit/index" });
   },
 
-  openTask(event) {
-    const taskId = event.currentTarget.dataset.taskId;
-    const task = this.data.tasks.find((item) => item.id === taskId);
-    if (!task || task.status !== "succeeded") return;
-    wx.navigateTo({ url: `/pages/result/index?task_id=${taskId}` });
-  },
-
   openAnalysisTasks() {
     wx.switchTab({ url: "/pages/tasks/index" });
   },
@@ -226,8 +291,4 @@ Page({
     wx.navigateTo({ url: "/pages/account-settings/index" });
   },
 
-  openCareerResult() {
-    if (!this.data.latestSucceededTaskId) return;
-    wx.navigateTo({ url: `/pages/result/index?task_id=${this.data.latestSucceededTaskId}` });
-  },
 });

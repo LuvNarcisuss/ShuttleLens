@@ -4,8 +4,8 @@ page {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
 }
 
-.page { height: 100vh; box-sizing: border-box; padding: 0 24rpx calc(32rpx + env(safe-area-inset-bottom)); }
-.profile-hero { position: relative; margin: 0 -24rpx; padding: 38rpx 30rpx 34rpx; border-radius: 0 0 34rpx 34rpx; background: linear-gradient(135deg, var(--brand-primary-strong), var(--brand-primary)); color: #FFFFFF; box-shadow: 0 16rpx 38rpx rgba(22, 136, 255, .22); }
+.page { width: 100%; height: 100vh; box-sizing: border-box; padding: 0 0 calc(32rpx + env(safe-area-inset-bottom)); }
+.profile-hero { position: relative; width: 100%; box-sizing: border-box; margin: 0; padding: 38rpx 30rpx 34rpx; border-radius: 0 0 34rpx 34rpx; background: linear-gradient(135deg, var(--brand-primary-strong), var(--brand-primary)); color: #FFFFFF; box-shadow: 0 16rpx 38rpx rgba(22, 136, 255, .22); }
 .hero-actions { position: absolute; top: 20rpx; right: 22rpx; display: flex; gap: 8rpx; }
 .hero-icon-button { display: flex; align-items: center; justify-content: center; width: 88rpx; min-width: 88rpx; height: 88rpx; margin: 0; padding: 0; background: transparent; color: #FFFFFF; font-size: 38rpx; line-height: 1; }
 .hero-person { display: flex; align-items: center; gap: 22rpx; padding-right: 184rpx; }
@@ -39,17 +39,34 @@ page {
 .task-bottom { color: var(--brand-muted); font-size: 22rpx; }
 .preview { margin: 0; padding: 0 18rpx; border-radius: 10rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 22rpx; line-height: 56rpx; }
 .error { display: block; margin-top: 22rpx; color: var(--brand-danger); font-size: 24rpx; line-height: 1.6; }
-.career-section { margin-top: 22rpx; padding: 30rpx 18rpx; border-radius: 22rpx; background: #FFFFFF; box-shadow: 0 6rpx 20rpx rgba(35, 72, 120, .08); }
+.career-section { margin: 22rpx 24rpx 0; padding: 30rpx 18rpx; border-radius: 22rpx; background: #FFFFFF; box-shadow: 0 6rpx 20rpx rgba(35, 72, 120, .08); }
 .career-heading { display: flex; align-items: center; justify-content: space-between; gap: 18rpx; padding: 0 12rpx; }
 .career-title, .career-caption { display: block; }
 .career-title { font-size: 31rpx; font-weight: 650; }
-.career-caption { margin-top: 8rpx; color: var(--brand-muted); font-size: 22rpx; }
+.career-range { min-width: 106rpx; padding: 14rpx 16rpx; border-radius: 12rpx; background: #F1F5F9; color: #667085; font-size: 22rpx; text-align: center; }
 .career-state { display: flex; align-items: center; flex-direction: column; gap: 16rpx; padding: 70rpx 12rpx 46rpx; color: var(--brand-muted); font-size: 25rpx; line-height: 1.6; text-align: center; }
 .career-empty-action { min-height: 88rpx; margin: 0; padding: 0 26rpx; border-radius: 14rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 24rpx; line-height: 1.2; }
-.career-grid { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 20rpx; }
-.career-metric { min-width: 0; padding: 22rpx 8rpx; text-align: center; }
+.career-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18rpx; margin-top: 38rpx; }
+.career-record-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4rpx; margin-top: 26rpx; }
+.career-record-metric { display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
+.career-record-value { display: block; overflow: hidden; font-size: 43rpx; font-weight: 750; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.career-record-label { display: block; margin-top: 10rpx; color: var(--brand-muted); font-size: 22rpx; }
+.career-record-total_matches .career-record-value { color: var(--brand-primary); }
+.career-record-win_count .career-record-value { color: var(--brand-success); }
+.career-record-loss_count .career-record-value { color: var(--brand-danger); }
+.career-record-draw_count .career-record-value { color: #F59E0B; }
+.career-record-win_rate .career-record-value { color: #667085; font-size: 39rpx; }
+.career-metric { min-width: 0; padding: 24rpx 8rpx; border-radius: 14rpx; background: linear-gradient(135deg, #F7FDFF, #FFFFFF); text-align: center; }
 .career-label { display: block; min-height: 62rpx; overflow: hidden; color: var(--brand-muted); font-size: 22rpx; line-height: 1.4; }
 .career-value-row { display: flex; align-items: baseline; justify-content: center; min-width: 0; margin-top: 10rpx; }
-.career-value { overflow: hidden; font-size: 34rpx; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.career-value { overflow: hidden; color: var(--brand-primary); font-size: 36rpx; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .career-unit { flex: 0 0 auto; margin-left: 4rpx; color: var(--brand-muted); font-size: 19rpx; }
 .login, .preview { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 88rpx; line-height: 1.2; }
+.career-recent { margin: 32rpx 0 4rpx; border-top: 1rpx solid var(--brand-divider); }
+.career-recent-title { display: block; margin: 24rpx 0 8rpx; font-size: 27rpx; font-weight: 650; }
+.career-recent-row { display: flex; align-items: center; justify-content: space-between; min-height: 76rpx; border-top: 1rpx solid #F2F4F7; }
+.career-recent-name { color: #475467; font-size: 25rpx; }
+.career-result { min-width: 48rpx; padding: 5rpx 12rpx; border-radius: 8rpx; font-size: 21rpx; text-align: center; }
+.career-result-win { background: #DCFCE7; color: #16A34A; }
+.career-result-loss { background: #FEE2E2; color: #DC2626; }
+.career-result-draw { background: #FEF3C7; color: #D97706; }

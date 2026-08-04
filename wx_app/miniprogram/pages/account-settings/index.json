@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "羽球拍档 · 账号设置"
+  "usingComponents": {},
+  "navigationBarTitleText": "羽球拍档 · 账号设置",
+  "navigationBarBackgroundColor": "#FFFFFF",
+  "navigationBarTextStyle": "black"
 }

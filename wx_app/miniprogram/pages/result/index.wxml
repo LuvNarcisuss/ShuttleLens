@@ -16,8 +16,8 @@
   <view wx:else class="content">
     <view wx:if="{{structuredUnavailable}}" class="legacy-note">该历史任务暂无结构化复盘，仍可查看原视频和图表。</view>
     <view wx:if="{{videoPath}}" class="result-card">
-      <view class="card-title"><text>结果视频</text><button class="fullscreen" bindtap="enterFullscreen">横屏全屏</button></view>
-      <video id="result-video" src="{{videoPath}}" controls object-fit="contain" bindfullscreenchange="onFullscreenChange" class="video" />
+      <view class="card-title"><text>结果视频</text></view>
+      <video id="result-video" src="{{videoPath}}" controls object-fit="contain" class="video" />
       <button class="save-button" bindtap="saveVideo" disabled="{{savingVideo}}">
         {{savingVideo ? '下载中 ' + downloadProgress + '%' : '保存视频到相册'}}
       </button>
@@ -35,8 +35,7 @@
         <view class="scope-tab {{scope === 'rally' ? 'active' : ''}}" data-scope="rally" bindtap="changeScope">回合</view>
       </view>
       <view class="player-switch" wx:if="{{scope !== 'match'}}">
-        <text class="{{selectedPlayer === 'upper' ? 'selected' : ''}}" data-player="upper" bindtap="selectPlayer">上半场球员</text>
-        <text class="{{selectedPlayer === 'lower' ? 'selected' : ''}}" data-player="lower" bindtap="selectPlayer">下半场球员</text>
+        <text wx:for="{{playerTabs}}" wx:key="position" class="{{selectedPlayer === item.position ? 'selected' : ''}}" data-player="{{item.position}}" bindtap="selectPlayer">{{item.label}}</text>
       </view>
       <view class="metric-grid">
         <view wx:for="{{metricCards}}" wx:key="key" class="metric-card">
