@@ -57,6 +57,24 @@ test("loads the complete account ID and binds a replacement phone number", async
   assert.match(page.data.errorMessage, /拒绝/);
 });
 
+test("shows a default message for missing phone code and falls back after binding failure", async () => {
+  const page = loadPage({
+    auth: {
+      async bindPhone() {
+        throw new Error();
+      },
+    },
+    wx: {},
+  });
+
+  await page.replacePhone({ detail: {} });
+  assert.equal(page.data.errorMessage, "未获取到手机号授权凭证");
+
+  await page.replacePhone({ detail: { code: "phone-code" } });
+  assert.equal(page.data.errorMessage, "手机号更换失败");
+  assert.equal(page.data.isLoading, false);
+});
+
 test("only logs out after the user confirms the logout modal", () => {
   const calls = [];
   const modals = [];

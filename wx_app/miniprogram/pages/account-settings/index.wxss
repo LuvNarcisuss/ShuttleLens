@@ -21,7 +21,7 @@ page {
 .settings-value { flex: 1; min-width: 0; color: var(--brand-muted); font-size: 25rpx; word-break: break-all; }
 .account-value { color: var(--brand-text); }
 .row-action, .settings-action { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 88rpx; }
-.row-action { flex: 0 0 auto; margin: 0; padding: 0 20rpx; border-radius: 12rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 23rpx; line-height: 1.2; }
+.row-action { flex: 0 0 auto; min-width: 88rpx; margin: 0; padding: 0 20rpx; border-radius: 12rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 23rpx; line-height: 1.2; }
 .row-action::after, .settings-action::after { border: 0; }
 .unavailable { background: #F2F4F7; color: var(--brand-muted); }
 .settings-feedback { margin-top: 20rpx; padding: 20rpx 24rpx; border-radius: 14rpx; background: #FFF7E8; color: #9A6700; font-size: 24rpx; line-height: 1.6; }
