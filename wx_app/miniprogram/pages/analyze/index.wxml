@@ -1,0 +1,70 @@
+<scroll-view class="page brand-page" scroll-y>
+  <view class="hero analysis-hero">
+    <text class="eyebrow">BADMINTON LAB</text>
+    <text class="title">分析一场比赛</text>
+    <text class="subtitle">选择一个完整视频，校准球场后即可离开等待</text>
+  </view>
+
+  <view class="card analysis-step-card upload-card">
+    <view class="card-heading"><text class="step step-index">01</text><text>选择比赛视频</text></view>
+    <view class="shooting-tips">
+      <text class="tips-title">拍摄建议</text>
+      <text>固定机位 · 完整拍到双方半场 · 避免逆光和频繁遮挡</text>
+    </view>
+    <button class="primary" bindtap="chooseVideo">{{videoPath ? '重新选择视频' : '选择比赛视频'}}</button>
+    <view class="video-info" wx:if="{{videoInfo}}">
+      <text class="video-name">{{videoInfo.name}}</text>
+      <view class="meta-row">
+        <text>{{videoInfo.durationLabel}}</text><text>{{videoInfo.sizeLabel}}</text><text>{{videoInfo.resolutionLabel}}</text>
+      </view>
+      <text class="estimate">{{estimateLabel}}</text>
+    </view>
+  </view>
+
+  <view class="card analysis-step-card">
+    <view class="card-heading"><text class="step step-index">02</text><text>选择分析档位</text></view>
+    <view class="preset-grid">
+      <view wx:for="{{presets}}" wx:key="key" class="preset {{preset === item.key ? 'preset-active' : ''}}" data-key="{{item.key}}" bindtap="selectPreset">
+        <text class="preset-name">{{item.label}}</text><text class="preset-desc">{{item.description}}</text>
+      </view>
+    </view>
+    <view class="advanced-toggle" bindtap="toggleAdvanced"><text>高级设置</text><text>{{advancedOpen ? '收起' : '展开'}} ›</text></view>
+    <view class="advanced" wx:if="{{advancedOpen}}">
+      <view class="field"><text>姿态模型</text><picker range="{{poseFamilies}}" value="{{poseFamilyIndex}}" bindchange="onPoseFamilyChange"><view class="picker">{{options.pose_family}} ›</view></picker></view>
+      <view class="field"><text>姿态档位</text><picker range="{{poseModes}}" value="{{poseModeIndex}}" bindchange="onPoseModeChange"><view class="picker">{{options.pose_mode}} ›</view></picker></view>
+      <view class="field"><text>语言</text><picker range="{{languages}}" value="{{languageIndex}}" bindchange="onLanguageChange"><view class="picker">{{options.language}} ›</view></picker></view>
+      <view class="field"><text>保留音频</text><switch checked="{{options.audio}}" data-key="audio" bindchange="onOptionToggle" color="#1688FF" /></view>
+      <view class="field"><text>骨架与轨迹</text><switch checked="{{options.show_skeletons}}" data-key="show_skeletons" bindchange="onOptionToggle" color="#1688FF" /></view>
+      <view class="field"><text>球员统计</text><switch checked="{{options.show_player_stats}}" data-key="show_player_stats" bindchange="onOptionToggle" color="#1688FF" /></view>
+    </view>
+  </view>
+
+  <view class="card analysis-step-card">
+    <view class="card-heading"><text class="step step-index">03</text><text>检测并校准球场</text></view>
+    <button class="secondary" bindtap="detectCourt" loading="{{isPreparing}}" disabled="{{isPreparing || !videoPath}}">检测球场</button>
+    <text class="hint">系统会自动从视频提取清晰画面，无需另传截图。</text>
+    <view class="fallback" wx:if="{{failureMessage && !templatePath}}">
+      <text>自动提取失败时，可选择球场模板作为兜底。</text>
+      <button class="ghost compact" bindtap="chooseTemplate">选择球场模板</button>
+    </view>
+    <view class="calibration calibration-panel" wx:if="{{templatePath}}">
+      <view class="zoom-row"><text>校准画面 {{corners.length}}/4</text><view><text bindtap="zoomOut">－</text><text bindtap="resetZoom">{{calibrationScale}}×</text><text bindtap="zoomIn">＋</text></view></view>
+      <view class="template-viewport">
+        <view class="template-stage" style="transform: scale({{calibrationScale}})">
+          <image id="template-preview" class="template" src="{{templatePath}}" mode="widthFix" bindload="onTemplateLoad" bindtap="addCorner" />
+          <view wx:for="{{corners}}" wx:key="index" class="corner-marker" style="left: {{item[0] * 100 / templateNaturalWidth}}%; top: {{item[1] * 100 / templateNaturalHeight}}%;" data-index="{{index}}" catchtouchmove="moveCorner">{{index + 1}}</view>
+        </view>
+      </view>
+      <text class="hint" wx:if="{{manualMode}}">按左上、右上、右下、左下依次点选；拖动编号点可微调。</text>
+      <view class="action-row" wx:if="{{manualMode}}"><button class="ghost" bindtap="resetCorners">重选四点</button><button class="secondary compact" bindtap="saveManualCorners" disabled="{{corners.length !== 4}}">保存四点</button></view>
+    </view>
+  </view>
+
+  <view class="card analysis-step-card start-card">
+    <view class="card-heading"><text class="step step-index">04</text><text>开始分析</text></view>
+    <button class="primary" bindtap="startAnalysis" disabled="{{isRunning || corners.length !== 4}}">开始分析</button>
+    <text class="hint">提交后可离开本页，进度和结果会保留在任务中心。</text>
+    <view class="progress-block" wx:if="{{taskId}}"><view class="progress-meta"><text>{{taskStatus}}</text><text>{{progress}}%</text></view><progress percent="{{progress}}" stroke-width="6" activeColor="#1688FF" backgroundColor="#E3E8EF" /></view>
+    <text class="error" wx:if="{{failureMessage}}">{{failureMessage}}</text>
+  </view>
+</scroll-view>
