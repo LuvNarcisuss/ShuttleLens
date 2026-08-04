@@ -12,6 +12,10 @@ function deferred() {
   return { promise, resolve: resolvePromise };
 }
 
+function flushPromises() {
+  return new Promise((resolvePromise) => setImmediate(resolvePromise));
+}
+
 function loadPage({ profile = {}, analysis = {}, result = {}, token = "", wx = {} } = {}) {
   let definition;
   const source = readFileSync(resolve(pageDirectory, "index.js"), "utf8");
@@ -71,6 +75,55 @@ test("profile page displays persisted avatar nickname masked phone and safe task
   });
 });
 
+test("profile page resets stale user state without calling protected services when logged out", async () => {
+  const calls = [];
+  const page = loadPage({
+    token: "",
+    profile: { async getCurrentProfile() { calls.push("profile"); return {}; } },
+    analysis: { async listTasks() { calls.push("tasks"); return { items: [] }; } },
+  });
+  page.setData({
+    profile: { id: "old-user" },
+    displayName: "旧用户",
+    avatarUrl: "https://example.com/old.png",
+    maskedPhone: "138****0000",
+    requiredSteps: ["phone"],
+    isLoggedIn: true,
+    loginStatus: "资料已完善",
+    isLoading: true,
+    tasks: [{ id: "old-task" }],
+    tasksState: "unavailable",
+    taskErrorMessage: "旧任务错误",
+    errorMessage: "旧错误",
+    accountDisplay: "old-user",
+    latestSucceededTaskId: "old-task",
+    careerState: "ready",
+    careerMetrics: [{ key: "old", value: "99" }],
+    careerErrorMessage: "旧生涯错误",
+  });
+
+  await page.onShow();
+
+  assert.deepEqual(calls, []);
+  assert.equal(page.data.profile, null);
+  assert.equal(page.data.displayName, "微信用户");
+  assert.equal(page.data.avatarUrl, "");
+  assert.equal(page.data.maskedPhone, "");
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.requiredSteps)), []);
+  assert.equal(page.data.isLoggedIn, false);
+  assert.equal(page.data.loginStatus, "未登录");
+  assert.equal(page.data.isLoading, false);
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.tasks)), []);
+  assert.equal(page.data.tasksState, "empty");
+  assert.equal(page.data.taskErrorMessage, "");
+  assert.equal(page.data.errorMessage, "");
+  assert.equal(page.data.accountDisplay, "");
+  assert.equal(page.data.latestSucceededTaskId, "");
+  assert.equal(page.data.careerState, "empty");
+  assert.equal(page.data.careerMetrics.every((item) => item.value === "—"), true);
+  assert.equal(page.data.careerErrorMessage, "");
+});
+
 test("login entry navigates to the dedicated login page without requesting profile", () => {
   const calls = [];
   const page = loadPage({
@@ -99,6 +152,7 @@ test("completed task opens the independent result page directly", () => {
 test("profile page loads the latest succeeded upper-player career snapshot", async () => {
   const calls = [];
   const page = loadPage({
+    token: "token-1",
     profile: { getCurrentProfile: async () => ({ id: "player-12345678" }) },
     analysis: {
       listTasks: async () => ({
@@ -147,6 +201,7 @@ test("profile page loads the latest succeeded upper-player career snapshot", asy
 
 test("profile page shows empty career metrics when no task has succeeded", async () => {
   const page = loadPage({
+    token: "token-1",
     profile: { getCurrentProfile: async () => ({ id: "player-123" }) },
     analysis: { listTasks: async () => ({ items: [{ id: "task-running", status: "running" }] }) },
   });
@@ -159,6 +214,7 @@ test("profile page shows empty career metrics when no task has succeeded", async
 
 test("profile page preserves profile and recent tasks when career analytics is unavailable", async () => {
   const page = loadPage({
+    token: "token-1",
     profile: { getCurrentProfile: async () => ({ id: "account-123456789", nickname: "羽球小将" }) },
     analysis: {
       listTasks: async () => ({
@@ -179,6 +235,74 @@ test("profile page preserves profile and recent tasks when career analytics is u
   assert.equal(page.data.displayName, "羽球小将");
   assert.equal(page.data.accountDisplay, "…23456789");
   assert.equal(page.data.tasks.length, 2);
+});
+
+test("profile page publishes profile and tasks before slow career analytics finishes", async () => {
+  const analyticsResult = deferred();
+  const page = loadPage({
+    token: "token-1",
+    profile: { getCurrentProfile: async () => ({ id: "account-1", nickname: "即时资料" }) },
+    analysis: {
+      listTasks: async () => ({
+        items: [{ id: "task-success", status: "succeeded", progress: 100 }],
+      }),
+    },
+    result: { getAnalytics: async () => analyticsResult.promise },
+  });
+
+  const loading = page.loadPageData();
+  await flushPromises();
+  const stateBeforeAnalytics = {
+    displayName: page.data.displayName,
+    tasks: JSON.parse(JSON.stringify(page.data.tasks)),
+    tasksState: page.data.tasksState,
+    careerState: page.data.careerState,
+  };
+  analyticsResult.resolve({ players: { upper: { distance_m: { value: 10, available: true } } } });
+  await loading;
+
+  assert.equal(stateBeforeAnalytics.displayName, "即时资料");
+  assert.deepEqual(stateBeforeAnalytics.tasks, [{
+    id: "task-success",
+    status: "succeeded",
+    statusLabel: "已完成",
+    progress: 100,
+    createdAt: "",
+  }]);
+  assert.equal(stateBeforeAnalytics.tasksState, "ready");
+  assert.equal(stateBeforeAnalytics.careerState, "loading");
+});
+
+test("profile page shows a task error without clearing a successful profile", async () => {
+  const page = loadPage({
+    token: "token-1",
+    profile: { getCurrentProfile: async () => ({ id: "account-1", nickname: "保留资料" }) },
+    analysis: { listTasks: async () => { throw new Error("tasks unavailable"); } },
+  });
+
+  await page.loadPageData();
+
+  assert.equal(page.data.displayName, "保留资料");
+  assert.equal(page.data.tasksState, "unavailable");
+  assert.equal(page.data.taskErrorMessage, "最近分析加载失败，请稍后重试");
+});
+
+test("profile page treats a missing or invalid upper player as unavailable", async () => {
+  for (const analytics of [{ players: {} }, { players: { upper: "invalid" } }]) {
+    const page = loadPage({
+      token: "token-1",
+      profile: { getCurrentProfile: async () => ({ id: "account-1" }) },
+      analysis: {
+        listTasks: async () => ({ items: [{ id: "task-success", status: "succeeded", progress: 100 }] }),
+      },
+      result: { getAnalytics: async () => analytics },
+    });
+
+    await page.loadPageData();
+
+    assert.equal(page.data.careerState, "unavailable");
+    assert.equal(page.data.careerErrorMessage, "本次结果暂无生涯数据");
+  }
 });
 
 test("profile page opens account settings, task list, and latest career result", () => {

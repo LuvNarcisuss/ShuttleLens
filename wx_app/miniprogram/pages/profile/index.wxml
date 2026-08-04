@@ -28,8 +28,9 @@
       <text>最近分析</text>
       <button class="section-link" bindtap="openAnalysisTasks">查看更多</button>
     </view>
-    <view wx:if="{{isLoading}}" class="empty">正在加载…</view>
-    <view wx:elif="{{!tasks.length}}" class="empty">暂无分析任务</view>
+    <view wx:if="{{tasksState === 'loading'}}" class="empty">正在加载…</view>
+    <view wx:elif="{{tasksState === 'unavailable'}}" class="empty error">{{taskErrorMessage}}</view>
+    <view wx:elif="{{tasksState === 'empty'}}" class="empty">暂无分析任务</view>
     <view wx:else class="task-list">
       <view class="task" wx:for="{{tasks}}" wx:key="id">
         <view class="task-top">
@@ -46,7 +47,6 @@
         </view>
       </view>
     </view>
-    <text class="error" wx:if="{{errorMessage}}">{{errorMessage}}</text>
   </view>
 
   <view class="career-section">

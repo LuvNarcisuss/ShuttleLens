@@ -45,6 +45,16 @@ function formatCareerMetrics(player = {}) {
   return CAREER_METRICS.map((definition) => displayMetric(player, definition));
 }
 
+function hasCareerData(player) {
+  if (!player || typeof player !== "object" || Array.isArray(player)) return false;
+  return CAREER_METRICS.some(([key]) => {
+    const raw = nestedValue(player, key);
+    const metric = raw && typeof raw === "object" && "value" in raw ? raw : null;
+    if (metric) return metric.available === false || Number.isFinite(Number(metric.value));
+    return raw !== null && raw !== "" && Number.isFinite(Number(raw));
+  });
+}
+
 function safeTask(task) {
   return {
     id: task.id,
@@ -66,6 +76,8 @@ Page({
     loginStatus: "未登录",
     isLoading: true,
     tasks: [],
+    tasksState: "loading",
+    taskErrorMessage: "",
     errorMessage: "",
     accountDisplay: "",
     latestSucceededTaskId: "",
@@ -79,59 +91,114 @@ Page({
   },
 
   async loadPageData() {
-    this.setData({ isLoading: true, errorMessage: "", careerState: "loading", careerErrorMessage: "" });
-    const [profileResult, tasksResult] = await Promise.allSettled([
-      getCurrentProfile(),
-      listTasks(),
-    ]);
-    const patch = {
-      isLoading: false,
-      accountDisplay: "",
-      latestSucceededTaskId: "",
-      careerState: "empty",
-      careerMetrics: formatCareerMetrics(),
-      careerErrorMessage: "",
-    };
-    if (profileResult.status === "fulfilled") {
-      const profile = profileResult.value || {};
-      patch.profile = profile;
-      patch.displayName = profile.nickname || "微信用户";
-      patch.accountDisplay = profile.id == null ? "" : (String(profile.id).length <= 12 ? profile.id : `…${String(profile.id).slice(-8)}`);
-      patch.avatarUrl = profile.avatar_url || "";
-      patch.maskedPhone = profile.masked_phone || "";
-      patch.requiredSteps = Array.isArray(profile.required_steps) ? profile.required_steps : [];
-      patch.isLoggedIn = true;
-      patch.loginStatus = profile.onboarding_status === "active" ? "资料已完善" : "资料待完善";
-      if (typeof wx.setStorageSync === "function") wx.setStorageSync("current_user", profile);
-    } else {
-      patch.isLoggedIn = Boolean(getAccessToken());
-      patch.loginStatus = patch.isLoggedIn ? "登录信息待刷新" : "未登录";
-      patch.maskedPhone = "";
-      patch.requiredSteps = [];
+    if (!getAccessToken()) {
+      this.setData({
+        profile: null,
+        displayName: "微信用户",
+        avatarUrl: "",
+        maskedPhone: "",
+        requiredSteps: [],
+        isLoggedIn: false,
+        loginStatus: "未登录",
+        isLoading: false,
+        tasks: [],
+        tasksState: "empty",
+        taskErrorMessage: "",
+        errorMessage: "",
+        accountDisplay: "",
+        latestSucceededTaskId: "",
+        careerState: "empty",
+        careerMetrics: formatCareerMetrics(),
+        careerErrorMessage: "",
+      });
+      return;
     }
-    if (tasksResult.status === "fulfilled") {
-      const payload = tasksResult.value;
-      const items = Array.isArray(payload) ? payload : (payload && payload.items) || [];
-      patch.tasks = items.slice(0, 2).map(safeTask);
-      const latestSucceededTask = items.find((item) => item.status === "succeeded");
-      if (latestSucceededTask) {
+
+    this.setData({
+      isLoading: true,
+      tasksState: "loading",
+      taskErrorMessage: "",
+      errorMessage: "",
+      careerState: "loading",
+      careerErrorMessage: "",
+    });
+
+    const profileRequest = getCurrentProfile()
+      .then((profileValue) => {
+        const profile = profileValue || {};
+        this.setData({
+          profile,
+          displayName: profile.nickname || "微信用户",
+          accountDisplay: profile.id == null ? "" : (String(profile.id).length <= 12 ? profile.id : `…${String(profile.id).slice(-8)}`),
+          avatarUrl: profile.avatar_url || "",
+          maskedPhone: profile.masked_phone || "",
+          requiredSteps: Array.isArray(profile.required_steps) ? profile.required_steps : [],
+          isLoggedIn: true,
+          loginStatus: profile.onboarding_status === "active" ? "资料已完善" : "资料待完善",
+          isLoading: false,
+        });
+        if (typeof wx.setStorageSync === "function") wx.setStorageSync("current_user", profile);
+      })
+      .catch(() => {
+        this.setData({
+          profile: null,
+          displayName: "微信用户",
+          accountDisplay: "",
+          avatarUrl: "",
+          maskedPhone: "",
+          requiredSteps: [],
+          isLoggedIn: Boolean(getAccessToken()),
+          loginStatus: getAccessToken() ? "登录信息待刷新" : "未登录",
+          isLoading: false,
+        });
+      });
+
+    const tasksRequest = listTasks()
+      .then(async (payload) => {
+        const items = Array.isArray(payload) ? payload : (payload && payload.items) || [];
+        const tasks = items.slice(0, 2).map(safeTask);
+        const latestSucceededTask = items.find((item) => item.status === "succeeded");
+        this.setData({
+          tasks,
+          tasksState: tasks.length ? "ready" : "empty",
+          taskErrorMessage: "",
+          latestSucceededTaskId: "",
+          careerState: latestSucceededTask ? "loading" : "empty",
+          careerMetrics: formatCareerMetrics(),
+          careerErrorMessage: "",
+        });
+        if (!latestSucceededTask) return;
+
         try {
           const analytics = await getAnalytics(latestSucceededTask.id);
-          patch.latestSucceededTaskId = latestSucceededTask.id;
-          patch.careerState = "ready";
-          patch.careerMetrics = formatCareerMetrics((analytics.players || {}).upper || {});
+          const player = analytics && analytics.players && analytics.players.upper;
+          if (!hasCareerData(player)) {
+            this.setData({ careerState: "unavailable", careerErrorMessage: "本次结果暂无生涯数据" });
+            return;
+          }
+          this.setData({
+            latestSucceededTaskId: latestSucceededTask.id,
+            careerState: "ready",
+            careerMetrics: formatCareerMetrics(player),
+            careerErrorMessage: "",
+          });
         } catch (error) {
-          patch.careerState = "unavailable";
-          patch.careerErrorMessage = "本次结果暂无生涯数据";
+          this.setData({ careerState: "unavailable", careerErrorMessage: "本次结果暂无生涯数据" });
         }
-      }
-    } else {
-      patch.tasks = [];
-    }
-    if (profileResult.status === "rejected" && tasksResult.status === "rejected") {
-      patch.errorMessage = "资料与任务加载失败，请稍后重试";
-    }
-    this.setData(patch);
+      })
+      .catch(() => {
+        this.setData({
+          tasks: [],
+          tasksState: "unavailable",
+          taskErrorMessage: "最近分析加载失败，请稍后重试",
+          latestSucceededTaskId: "",
+          careerState: "unavailable",
+          careerMetrics: formatCareerMetrics(),
+          careerErrorMessage: "生涯数据加载失败，请稍后重试",
+        });
+      });
+
+    await Promise.allSettled([profileRequest, tasksRequest]);
   },
 
   login() {
