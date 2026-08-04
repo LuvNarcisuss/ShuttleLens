@@ -76,7 +76,7 @@ function loadPage({ profile = {}, analysis = {}, result = {}, token = "", wx = {
 }
 ```
 
-Remove the unused `auth` injection because logout moves to the account settings page.
+Keep the existing `auth` injection during Task 1 because the current WXML still exposes the logout button. Task 2 removes the old account-security markup and the matching JS dependency together, so every intermediate commit remains runnable.
 
 - [ ] **Step 2: Write failing tests for the latest upper-player snapshot**
 
@@ -156,7 +156,7 @@ Expected: FAIL because the profile page does not require `../../services/result`
 
 - [ ] **Step 5: Implement metric formatting and isolated analytics loading**
 
-In `profile/index.js`, remove the profile-page logout dependency and add:
+In `profile/index.js`, keep the profile-page logout dependency for this task and add:
 
 ```js
 const { getAnalytics } = require("../../services/result");
@@ -213,7 +213,7 @@ In `loadPageData()`:
 6. If present, call `getAnalytics(id)` and set `careerState: "ready"`, `latestSucceededTaskId` and `formatCareerMetrics((analytics.players || {}).upper || {})`.
 7. If analytics fails, preserve profile/tasks and set `careerState: "unavailable"` with `careerErrorMessage: "本次结果暂无生涯数据"`.
 
-Add the navigation handlers exactly as asserted in Step 3. Keep the existing login and `openTask` behavior.
+Add the navigation handlers exactly as asserted in Step 3. Keep the existing login, logout and `openTask` behavior.
 
 - [ ] **Step 6: Run focused tests and typecheck**
 
@@ -240,6 +240,7 @@ git commit -m "feat: add upper-player career snapshot"
 ### Task 2: Profile Home Layout
 
 **Files:**
+- Modify: `wx_app/miniprogram/pages/profile/index.js`
 - Modify: `wx_app/miniprogram/pages/profile/index.wxml`
 - Modify: `wx_app/miniprogram/pages/profile/index.wxss`
 - Test: `wx_app/tests/pages/profile-runtime.test.js`
@@ -336,7 +337,7 @@ Append this section after recent analysis:
 </view>
 ```
 
-Delete the old `profile-account-section` and `profile-security-section` markup entirely.
+Delete the old `profile-account-section` and `profile-security-section` markup entirely. In the same step, remove the now-unreachable `clearLocalSession` import and `logout()` method from `profile/index.js`.
 
 - [ ] **Step 5: Implement responsive WXSS**
 
@@ -375,7 +376,7 @@ Expected: tests and typecheck PASS; no missing handlers.
 - [ ] **Step 7: Commit Task 2**
 
 ```powershell
-git add -- wx_app/miniprogram/pages/profile/index.wxml wx_app/miniprogram/pages/profile/index.wxss
+git add -- wx_app/miniprogram/pages/profile/index.js wx_app/miniprogram/pages/profile/index.wxml wx_app/miniprogram/pages/profile/index.wxss
 git diff --cached --check
 git commit -m "feat: refresh profile home layout"
 ```
