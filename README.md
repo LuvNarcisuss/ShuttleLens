@@ -1,6 +1,6 @@
 # Good-Badminton
 
-本仓库基于 [yo-WASSUP/Good-Badminton](https://github.com/yo-WASSUP/Good-Badminton) 开源项目改造。原项目提供羽毛球视频分析能力；本仓库在此基础上增加了 FastAPI 后端、MySQL 数据库和微信小程序，形成从移动端登录、提交分析任务到查看结果的完整流程。
+本项目基于 [yo-WASSUP/Good-Badminton](https://github.com/yo-WASSUP/Good-Badminton) 开源项目改造。原项目提供羽毛球视频分析能力；本仓库在此基础上增加了 FastAPI 后端、MySQL 数据库和微信小程序，形成从移动端登录、提交分析任务到查看结果的完整流程。
 
 仓库提供三种使用方式：
 
