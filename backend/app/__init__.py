@@ -1,0 +1,1 @@
+"""Good Badminton API package."""
