@@ -25,7 +25,11 @@
       <image wx:if="{{item.coverPath}}" class="cover" src="{{item.coverPath}}" mode="aspectFill" />
       <view wx:else class="cover placeholder"><text>羽</text></view>
       <view class="task-body">
-        <view class="task-heading"><text class="task-name">{{item.name}}</text><text class="task-tag status-{{item.status}}">{{item.statusLabel}}</text></view>
+        <view class="task-heading">
+          <text class="task-name">{{item.name}}</text>
+          <text wx:if="{{item.matchResultLabel}}" class="match-result match-result-{{item.match_result}}">{{item.matchResultLabel}}</text>
+          <text class="task-tag status-{{item.status}}">{{item.statusLabel}}</text>
+        </view>
         <text class="stage">{{item.stageLabel}}</text>
         <progress wx:if="{{item.status === 'queued' || item.status === 'running' || item.status === 'publishing'}}" class="task-progress" percent="{{item.progress}}" stroke-width="4" activeColor="#1688FF" backgroundColor="#EAF4FF" />
         <view class="meta"><text>{{item.durationLabel}}</text><text>{{item.createdLabel}}</text></view>

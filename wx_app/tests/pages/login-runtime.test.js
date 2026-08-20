@@ -40,6 +40,66 @@ test("agreement is required before the page can call wx.login through auth servi
   assert.deepEqual(calls, ["请先阅读并同意服务协议与隐私保护指引", "login"]);
 });
 
+test("agreement is required before account credentials can be submitted", async () => {
+  const calls = [];
+  const page = loadPage({
+    auth: {
+      async loginByAccount(accountNumber, password) {
+        calls.push([accountNumber, password]);
+        return { required_steps: [] };
+      },
+    },
+    wx: { showToast(input) { calls.push(input.title); } },
+  });
+  page.setData({ accountNumber: "12345678", password: "password123" });
+
+  await page.loginByAccount();
+
+  assert.deepEqual(calls, ["请先阅读并同意服务协议与隐私保护指引"]);
+});
+
+test("account login does not reveal whether the account or password was wrong", async () => {
+  const errorCodes = ["ACCOUNT_NOT_FOUND", "PASSWORD_NOT_SET", "INVALID_PASSWORD", "ACCOUNT_LOGIN_FAILED"];
+
+  for (const code of errorCodes) {
+    const page = loadPage({
+      auth: {
+        async loginByAccount() {
+          throw Object.assign(new Error("sensitive detail"), { code });
+        },
+      },
+      wx: {},
+    });
+    page.setData({ agreed: true, accountNumber: "12345678", password: "password123" });
+
+    await page.loginByAccount();
+
+    assert.equal(page.data.errorMessage, "账号或密码错误");
+  }
+});
+
+test("valid account credentials finish login through the existing session flow", async () => {
+  const calls = [];
+  const page = loadPage({
+    auth: {
+      async loginByAccount(accountNumber, password) {
+        calls.push([accountNumber, password]);
+        return { required_steps: [] };
+      },
+    },
+    wx: { switchTab(input) { calls.push(input.url); } },
+  });
+  page.setData({ agreed: true, accountNumber: "12345678", password: "password123" });
+
+  await page.loginByAccount();
+
+  assert.equal(page.data.step, "complete");
+  assert.deepEqual(calls, [
+    ["12345678", "password123"],
+    "/pages/profile/index",
+  ]);
+});
+
 test("required_steps move login from phone binding to profile completion", async () => {
   const calls = [];
   const page = loadPage({

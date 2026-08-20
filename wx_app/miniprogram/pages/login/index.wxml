@@ -16,13 +16,73 @@
       </label>
     </checkbox-group>
 
-    <button
-      wx:if="{{step === 'agreement' || step === 'wechat_login'}}"
-      class="primary"
-      bindtap="login"
-      loading="{{isLoading}}"
-      disabled="{{isLoading}}"
-    >微信快捷登录</button>
+    <view wx:if="{{step === 'agreement' || step === 'wechat_login'}}" class="login-methods">
+      <button
+        class="primary"
+        bindtap="login"
+        loading="{{isLoading}}"
+        disabled="{{isLoading}}"
+      >微信快捷登录</button>
+
+      <view class="method-divider" aria-hidden="true">
+        <view class="divider-line"></view>
+        <text class="divider-label">其他登录方式</text>
+        <view class="divider-line"></view>
+      </view>
+
+      <button
+        class="account-login-entry"
+        bindtap="showAccountLogin"
+        disabled="{{isLoading}}"
+      >账密登录</button>
+      <text class="account-hint">账号可在“我的－账号设置”中查看</text>
+    </view>
+
+    <view wx:elif="{{step === 'account_login'}}" class="stage account-stage">
+      <text class="stage-title">账号密码登录</text>
+      <text class="stage-copy">使用你的 8 位账号和已设置的密码</text>
+
+      <view class="account-form">
+        <view class="field-group">
+          <text class="field-label">8 位账号</text>
+          <input
+            class="field-input"
+            type="number"
+            maxlength="8"
+            value="{{accountNumber}}"
+            bindinput="onAccountNumberInput"
+            disabled="{{isLoading}}"
+            placeholder="请输入 8 位数字账号"
+          />
+        </view>
+        <view class="field-group">
+          <text class="field-label">密码</text>
+          <input
+            class="field-input"
+            password
+            maxlength="128"
+            value="{{password}}"
+            bindinput="onPasswordInput"
+            disabled="{{isLoading}}"
+            placeholder="请输入密码"
+            confirm-type="done"
+            bindconfirm="loginByAccount"
+          />
+        </view>
+      </view>
+
+      <button
+        class="primary account-submit"
+        bindtap="loginByAccount"
+        loading="{{isLoading}}"
+        disabled="{{isLoading}}"
+      >登录</button>
+      <button
+        class="wechat-return"
+        bindtap="showWechatLogin"
+        disabled="{{isLoading}}"
+      >返回微信快捷登录</button>
+    </view>
 
     <view wx:elif="{{step === 'phone_binding'}}" class="stage">
       <text class="stage-title">绑定手机号</text>

@@ -82,6 +82,32 @@ test("tasks page keeps cursor pagination stable and pull-down refresh resets it"
   assert.equal(stopped, 1);
 });
 
+test("tasks page maps recorded match results and leaves missing results hidden", async () => {
+  const page = loadPage({
+    analysis: {
+      async listTasks() {
+        return {
+          items: [
+            { id: "win-1", name: "胜场", status: "succeeded", stage: "completed", progress: 100, match_result: "win", video_metadata: {} },
+            { id: "loss-1", name: "负场", status: "succeeded", stage: "completed", progress: 100, match_result: "loss", video_metadata: {} },
+            { id: "draw-1", name: "平局", status: "succeeded", stage: "completed", progress: 100, match_result: "draw", video_metadata: {} },
+            { id: "legacy-1", name: "历史任务", status: "succeeded", stage: "completed", progress: 100, match_result: null, video_metadata: {} },
+          ],
+          total: 4,
+          next_cursor: null,
+        };
+      },
+    },
+  });
+
+  await page.refreshTasks();
+
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(page.data.tasks.map((item) => item.matchResultLabel))),
+    ["胜", "负", "平", ""],
+  );
+});
+
 test("tasks page does not restart polling when hidden during an in-flight refresh", async () => {
   let resolveList;
   const timers = [];

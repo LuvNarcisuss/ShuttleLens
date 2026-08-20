@@ -1,5 +1,5 @@
 const { request, setReloginHandler } = require("./http");
-const { clearAccessToken, getAccessToken, saveAccessToken } = require("./token");
+const { clearAccessToken, getAccessToken, getAuthMethod, saveAccessToken } = require("./token");
 const { API_BASE_URL } = require("./config");
 
 function getWechatLoginCode() {
@@ -19,7 +19,7 @@ async function ensureLogin() {
     method: "POST",
     data: { login_code: loginCode },
   });
-  saveAccessToken(response.access_token);
+  saveAccessToken(response.access_token, "wechat");
   return response;
 }
 
@@ -29,7 +29,7 @@ async function loginByAccount(accountNumber, password) {
     method: "POST",
     data: { account_number: accountNumber, password },
   });
-  saveAccessToken(response.access_token);
+  saveAccessToken(response.access_token, "account");
   return response;
 }
 
@@ -98,7 +98,19 @@ function logout() {
   }
 }
 
-setReloginHandler(ensureLogin);
+async function relogin() {
+  if (getAuthMethod() !== "account") return ensureLogin();
+
+  logout();
+  if (typeof wx.reLaunch === "function") {
+    wx.reLaunch({ url: "/pages/login/index" });
+  }
+  const error = new Error("登录已失效，请使用账号密码重新登录");
+  error.code = "ACCOUNT_RELOGIN_REQUIRED";
+  throw error;
+}
+
+setReloginHandler(relogin);
 
 module.exports = {
   bindPhone,

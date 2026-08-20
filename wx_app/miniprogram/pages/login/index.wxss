@@ -6,9 +6,25 @@
 .login-panel { padding: 40rpx 32rpx; border-radius: 24rpx; background: #ffffff; box-shadow: 0 12rpx 36rpx rgba(22, 136, 255, .12); }
 .agreement-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; color: var(--brand-muted); font-size: 24rpx; line-height: 42rpx; }
 .link { color: var(--brand-primary); }
+.login-methods { width: 100%; }
 .primary { margin-top: 34rpx; width: 100%; border-radius: 16rpx; background: var(--brand-primary); color: #ffffff; font-weight: 600; }
 .primary::after { border: 0; }
+.method-divider { display: flex; align-items: center; gap: 20rpx; margin: 32rpx 8rpx 24rpx; }
+.divider-line { flex: 1; height: 1rpx; background: var(--brand-divider); }
+.divider-label { flex: none; color: var(--brand-muted); font-size: 23rpx; }
+.account-login-entry { width: 100%; border: 2rpx solid #CFE5FF; border-radius: 16rpx; background: #F6FAFF; color: var(--brand-primary-strong); font-weight: 600; }
+.account-login-entry::after { border: 0; }
+.account-hint { display: block; margin-top: 16rpx; color: var(--brand-muted); font-size: 23rpx; text-align: center; }
 .stage { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .stage-title { margin-top: 20rpx; font-size: 34rpx; font-weight: 700; color: var(--brand-text); }
 .stage-copy { margin-top: 16rpx; color: var(--brand-muted); font-size: 26rpx; line-height: 42rpx; }
+.account-stage { width: 100%; }
+.account-form { box-sizing: border-box; width: 100%; margin-top: 30rpx; text-align: left; }
+.field-group + .field-group { margin-top: 24rpx; }
+.field-label { display: block; margin-bottom: 12rpx; color: var(--brand-text); font-size: 25rpx; font-weight: 600; }
+.field-input { box-sizing: border-box; width: 100%; height: 92rpx; padding: 0 24rpx; border: 2rpx solid var(--brand-divider); border-radius: 14rpx; background: #F9FBFD; color: var(--brand-text); font-size: 29rpx; }
+.field-input:focus { border-color: var(--brand-primary); background: #FFFFFF; }
+.account-submit { margin-top: 32rpx; }
+.wechat-return { margin-top: 16rpx; width: 100%; background: transparent; color: var(--brand-primary-strong); font-size: 26rpx; font-weight: 500; }
+.wechat-return::after { border: 0; }
 .error { display: block; margin-top: 24rpx; color: var(--brand-danger); font-size: 25rpx; text-align: center; }

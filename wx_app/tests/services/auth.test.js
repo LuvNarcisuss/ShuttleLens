@@ -6,9 +6,9 @@ const vm = require("node:vm");
 
 const servicePath = resolve(__dirname, "../../miniprogram/services/auth.js");
 
-function loadService({ request, token = null, wx = {} }) {
+function loadService({ request, token = null, authMethod = null, wx = {} }) {
   let reloginHandler;
-  const storage = { token };
+  const storage = { token, authMethod };
   const module = { exports: {} };
   vm.runInNewContext(readFileSync(servicePath, "utf8"), {
     module,
@@ -19,9 +19,10 @@ function loadService({ request, token = null, wx = {} }) {
         setReloginHandler(handler) { reloginHandler = handler; },
       };
       if (path === "./token") return {
-        clearAccessToken() { storage.token = null; },
+        clearAccessToken() { storage.token = null; storage.authMethod = null; },
         getAccessToken() { return storage.token; },
-        saveAccessToken(value) { storage.token = value; },
+        getAuthMethod() { return storage.authMethod; },
+        saveAccessToken(value, method) { storage.token = value; storage.authMethod = method; },
       };
       if (path === "./config") return { API_BASE_URL: "https://api.example.com/api" };
       throw new Error(`Unexpected dependency: ${path}`);
@@ -45,12 +46,33 @@ test("wechat login sends only login_code and stores the returned token", async (
   const response = await service.ensureLogin();
 
   assert.equal(storage.token, "jwt");
+  assert.equal(storage.authMethod, "wechat");
   assert.deepEqual(JSON.parse(JSON.stringify(calls)), [{
     url: "https://api.example.com/api/auth/wechat/login",
     method: "POST",
     data: { login_code: "login-code" },
   }]);
   assert.deepEqual(JSON.parse(JSON.stringify(response.required_steps)), ["bind_phone"]);
+});
+
+test("account login sends credentials and stores the returned token", async () => {
+  const calls = [];
+  const { service, storage } = loadService({
+    async request(input) {
+      calls.push(input);
+      return { access_token: "account-jwt", required_steps: [] };
+    },
+  });
+
+  await service.loginByAccount("12345678", "password123");
+
+  assert.equal(storage.token, "account-jwt");
+  assert.equal(storage.authMethod, "account");
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [{
+    url: "https://api.example.com/api/auth/account/login",
+    method: "POST",
+    data: { account_number: "12345678", password: "password123" },
+  }]);
 });
 
 test("phone binding sends only phone_code to its dedicated endpoint", async () => {
@@ -112,6 +134,36 @@ test("401 relogin handler uses wx.login and never asks for profile data", async 
   assert.deepEqual(JSON.parse(JSON.stringify(calls)), ["wx.login", { login_code: "fresh-code" }]);
 });
 
+test("account session expiry clears credentials and returns to login without wx.login", async () => {
+  const calls = [];
+  const { service, storage, getReloginHandler } = loadService({
+    authMethod: "account",
+    token: "expired-account-jwt",
+    wx: {
+      login({ fail }) {
+        calls.push("wx.login");
+        fail(Object.assign(new Error("wx.login must not run"), { code: "UNEXPECTED_WECHAT_LOGIN" }));
+      },
+      reLaunch(input) { calls.push(input.url); },
+      removeStorageSync() {},
+    },
+    async request() {
+      throw new Error("account relogin must not call the API");
+    },
+  });
+
+  await assert.rejects(
+    () => getReloginHandler()(),
+    (error) => error.code === "ACCOUNT_RELOGIN_REQUIRED"
+      && error.message === "登录已失效，请使用账号密码重新登录",
+  );
+
+  assert.equal(storage.token, null);
+  assert.equal(storage.authMethod, null);
+  assert.deepEqual(calls, ["/pages/login/index"]);
+  assert.equal(typeof service.loginByAccount, "function");
+});
+
 test("logout clears local token and caches without deleting the server account", () => {
   const removed = [];
   const { service, storage } = loadService({
@@ -123,6 +175,7 @@ test("logout clears local token and caches without deleting the server account",
   service.logout();
 
   assert.equal(storage.token, null);
+  assert.equal(storage.authMethod, null);
   assert.deepEqual(removed, [
     "current_user",
     "preview_task_id",

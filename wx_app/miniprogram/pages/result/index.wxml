@@ -26,7 +26,10 @@
     <view wx:if="{{analytics}}" class="result-card dashboard">
       <view class="card-title">
         <text>数据看板</text>
-        <text class="confidence">可信度 {{quality.confidence || 'unknown'}}</text>
+        <view class="dashboard-meta">
+          <text wx:if="{{matchResultLabel}}" class="match-result match-result-{{matchResult}}">{{matchResultLabel}}</text>
+          <text class="confidence">可信度 {{quality.confidence || 'unknown'}}</text>
+        </view>
       </view>
       <text class="quality-note" wx:if="{{quality.explanation}}">{{quality.explanation}}</text>
       <view class="scope-tabs">

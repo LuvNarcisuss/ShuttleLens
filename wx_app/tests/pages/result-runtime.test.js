@@ -47,11 +47,82 @@ test("succeeded task loads authenticated video and chart previews", async () => 
   assert.equal(calls.length, 2);
 });
 
+test("result page exposes badge data only for recorded match results", async () => {
+  const cases = [
+    ["win", "胜"],
+    ["loss", "负"],
+    ["draw", "平"],
+    [null, ""],
+  ];
+
+  for (const [matchResult, expectedLabel] of cases) {
+    const page = loadPage({
+      result: {
+        async getResultTask() {
+          return {
+            status: "succeeded",
+            progress: 100,
+            player_position: "upper",
+            match_result: matchResult,
+            result: {},
+          };
+        },
+        async loadResultResources() { return { videoPath: "", imagePaths: [] }; },
+      },
+      wx: {},
+    });
+
+    await page.onLoad({ task_id: `task-${matchResult || "legacy"}` });
+
+    assert.equal(page.data.matchResult, matchResult || "");
+    assert.equal(page.data.matchResultLabel, expectedLabel);
+  }
+});
+
+test("result layout keeps the hero compact and groups match result before dashboard confidence", () => {
+  const template = readFileSync(resolve(pageDirectory, "index.wxml"), "utf8");
+  const styles = readFileSync(resolve(pageDirectory, "index.wxss"), "utf8");
+  const heroStart = template.indexOf('<view class="result-hero">');
+  const heroEnd = template.indexOf("</view>", heroStart);
+
+  assert.doesNotMatch(template.slice(heroStart, heroEnd), /match-result/);
+  assert.match(
+    template,
+    /<view class="card-title">\s*<text>数据看板<\/text>\s*<view class="dashboard-meta">\s*<text wx:if="\{\{matchResultLabel\}\}" class="match-result match-result-\{\{matchResult\}\}">\{\{matchResultLabel\}\}<\/text>\s*<text class="confidence">可信度 \{\{quality\.confidence \|\| 'unknown'\}\}<\/text>\s*<\/view>\s*<\/view>\s*<text class="quality-note"/s,
+  );
+  assert.match(styles, /\.dashboard-meta\s*\{[^}]*display:\s*flex;[^}]*align-items:\s*center;[^}]*gap:\s*10rpx;/s);
+  assert.doesNotMatch(styles.match(/\.match-result\s*\{([^}]*)\}/s)?.[1] || "", /margin-top/);
+});
+
 test("resource failure leaves a recoverable result page state", async () => {
   const page = loadPage({ result: { async getResultTask() { return { status: "succeeded", result: { video: "private" } }; }, async loadResultResources() { throw new Error("资源缺失"); } }, wx: {} });
   await page.onLoad({ task_id: "task-resource-fail" });
   assert.equal(page.data.pageState, "resource_error");
   assert.equal(page.data.errorMessage, "资源缺失");
+});
+
+test("resource failure keeps the recorded match result available in page state", async () => {
+  const page = loadPage({
+    result: {
+      async getResultTask() {
+        return {
+          status: "succeeded",
+          progress: 100,
+          player_position: "upper",
+          match_result: "loss",
+          result: { video: "private" },
+        };
+      },
+      async loadResultResources() { throw new Error("资源缺失"); },
+    },
+    wx: {},
+  });
+
+  await page.onLoad({ task_id: "task-resource-fail-with-result" });
+
+  assert.equal(page.data.pageState, "resource_error");
+  assert.equal(page.data.matchResult, "loss");
+  assert.equal(page.data.matchResultLabel, "负");
 });
 
 test("legacy succeeded task remains viewable when structured results are absent", async () => {

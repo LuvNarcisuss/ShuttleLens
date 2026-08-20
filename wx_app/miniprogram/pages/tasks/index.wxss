@@ -21,6 +21,10 @@ button::after { border: 0; }
 .task-body { flex: 1; min-width: 0; }
 .task-heading { display: flex; align-items: center; gap: 12rpx; }
 .task-name { flex: 1; overflow: hidden; font-size: 29rpx; font-weight: 680; text-overflow: ellipsis; white-space: nowrap; }
+.match-result { flex: none; min-width: 48rpx; padding: 4rpx 12rpx; border-radius: 8rpx; font-size: 21rpx; text-align: center; }
+.match-result-win { background: #DCFCE7; color: #16A34A; }
+.match-result-loss { background: #FEE2E2; color: #DC2626; }
+.match-result-draw { background: #FEF3C7; color: #D97706; }
 .task-tag { flex: none; padding: 4rpx 12rpx; border-radius: 999rpx; background: #EAF4FF; color: var(--brand-primary-strong); font-size: 21rpx; }
 .status-queued, .status-running, .status-publishing { background: #EAF4FF; color: var(--brand-primary-strong); }
 .status-succeeded { background: rgba(18, 183, 106, .12); color: var(--brand-success); }

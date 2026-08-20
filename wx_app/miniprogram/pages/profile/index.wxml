@@ -16,7 +16,7 @@
         <text wx:if="{{isLoggedIn && maskedPhone}}" class="phone">{{maskedPhone}}</text>
       </view>
     </view>
-    <button wx:if="{{!isLoggedIn && !isLoading}}" class="login" bindtap="login">微信快捷登录</button>
+    <button wx:if="{{!isLoggedIn && !isLoading}}" class="login" bindtap="login">登录</button>
   </view>
 
   <view class="career-section">
